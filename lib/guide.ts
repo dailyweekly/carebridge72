@@ -1,9 +1,9 @@
 import messages from "@/data/messages.mock.json";
-import type { CareResource, FamilyGuide, Language, Patient, RiskResult } from "./types";
+import type { CareResource, DiagnosisGroup, FamilyGuide, Language, Patient, RiskResult } from "./types";
 import { languageLabels, regionLabels } from "./labels";
 import { validateLegalSafety } from "./legal";
 
-const templates = messages as Record<Language, { default: string }>;
+const templates = messages as Record<Language, Partial<Record<DiagnosisGroup | "default", string>>>;
 
 export function generateFamilyGuide(
   patient: Patient,
@@ -12,7 +12,7 @@ export function generateFamilyGuide(
   lang: Language = patient.preferredLanguage
 ): FamilyGuide {
   const language = templates[lang] ? lang : "ko";
-  const base = templates[language].default;
+  const base = selectTemplate(language, patient.primaryDiagnosisGroup);
   const lines = [
     base,
     "",
@@ -31,6 +31,10 @@ export function generateFamilyGuide(
     ],
     updatedAt: "2026-05-23"
   };
+}
+
+function selectTemplate(language: Language, diagnosis: DiagnosisGroup) {
+  return templates[language][diagnosis] ?? templates[language].default ?? templates.ko.default ?? "";
 }
 
 function renderContextLine(

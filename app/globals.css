@@ -30,3 +30,9 @@ textarea {
 .capture-watermark {
   background: #ffffff;
 }
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+}

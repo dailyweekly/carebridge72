@@ -80,7 +80,8 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
       </div>
 
       <div className="mt-3 rounded-md border border-line bg-panel p-3 text-xs leading-5 text-slate-600">
-        <span className="font-bold text-ink">출처·갱신일</span> {koreanGuide.updatedAt} 기준 공공 안내문 템플릿.
+        <span className="font-bold text-ink">출처·갱신일</span> 공공 안내문 템플릿 (보건복지부·HIRA,
+        {koreanGuide.updatedAt} 기준).
         원문 기준 URL: {[...new Set([...koreanGuide.sourceUrls, ...foreignGuide.sourceUrls])].join(" · ")}
       </div>
     </section>

@@ -9,7 +9,14 @@ npm install
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 엽니다. 통합 사례 화면은 `http://localhost:3000/capture`입니다.
+브라우저에서 `http://localhost:3000`을 엽니다. 고정 시연 화면은 `http://localhost:3000/demo`, 별첨 캡처 화면은 `http://localhost:3000/capture`입니다.
+
+Vercel 배포 URL:
+
+```text
+https://carebridge72.vercel.app
+https://carebridge72.vercel.app/capture
+```
 
 검증 명령:
 
@@ -30,16 +37,16 @@ npm run capture
 
 ## 2. 기술 스택
 
-Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다.
+Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다.
 
 ## 3. 데모 시나리오
 
-1. 0:00-0:35: `P003` 가명 환자(78세, 심부전군, 수원시, 단독 거주, 돌봄자 없음)의 8항목 입력을 확인합니다.
-2. 0:35-1:10: 재입원 위험 신호 카드에서 HIGH 78점, 근거 3개, 해석 가능 규칙 가중치, 모델 버전을 확인합니다.
-3. 1:10-1:50: 수원시 지역의 방문간호, 재가요양, 주야간보호 등 돌봄 자원 후보 정보를 확인합니다.
-4. 1:50-2:25: 한국어와 영어 또는 베트남어·중국어 가족 안내문을 확인하고 복사 버튼을 누릅니다.
-5. 2:25-2:45: 담당자 업무 대기열, 3-모델 구조, 공공데이터 출처·확보 단계를 보여줍니다.
-6. 2:45-3:00: 상단·하단 안전선 배너와 4-Zone 통제 패널을 보여주며 최종 판단은 공공 담당자가 수행한다는 점을 강조합니다.
+1. 0:00-0:30: 메인 페이지 또는 `/capture`로 진입해 `P003` 프리셋을 확인합니다.
+2. 0:30-1:00: 재입원 위험 신호 카드에서 HIGH 78점, 근거 3개, 모델 버전을 확인합니다.
+3. 1:00-1:35: 수원시 지역 돌봄 자원 후보 5건과 담당자 검토 상태를 확인합니다.
+4. 1:35-2:15: 한국어와 영어 가족 안내문, 안전선 검사 통과 상태를 확인합니다.
+5. 2:15-2:45: 담당자 판단 패널에서 권장 다음 행동, 체크리스트, 인계 요약을 확인합니다.
+6. 2:45-3:00: 안전선 배너와 4-Zone 통제 패널을 보여주며 최종 판단은 공공 담당자가 수행한다는 점을 강조합니다.
 
 고정 시연 URL은 `http://localhost:3000/demo`입니다.
 
@@ -49,9 +56,9 @@ Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mo
 
 `data/care_resources.mock.json`: 경기도 4개 시군별 가명 돌봄 자원 후보 정보 20건입니다. 기관 실명, 예약, 결제, 직접 연결 정보는 없습니다.
 
-`data/risk_rules.json`: 나이, 진단군, 동반질환, 돌봄자 유무를 합산하는 재현 가능한 위험 점수 규칙입니다.
+`data/risk_rules.json`: 나이, 진단군, 동반질환, 돌봄자 유무를 합산하는 재현 가능한 위험 점수 규칙입니다. 모델 버전은 `CB72-RULE-XGB-SURROGATE-2026.05`입니다.
 
-`data/messages.mock.json`: 한국어, 영어, 베트남어, 중국어 가족 안내문 템플릿입니다. 진단명, 약물명, 용량 지시 토큰은 넣지 않습니다.
+`data/messages.mock.json`: 한국어, 영어, 베트남어, 중국어 가족 안내문 템플릿입니다. 폐렴·COPD 프리셋은 vi/zh 템플릿을 별도로 선택하며, 진단명, 약물명, 용량 지시 토큰은 넣지 않습니다.
 
 `data/legal_safety_rules.json`: 안내문과 UI 문구 검사용 정규식 8개입니다.
 
@@ -64,6 +71,13 @@ Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mo
 ## 5. 법률 안전선
 
 케어브릿지72는 특정 의료기관·장기요양기관을 직접 추천·알선·예약·결제하지 않습니다. 화면은 공공 담당자가 검토할 후보 정보와 위험 신호를 제공하는 데 한정됩니다.
+
+4-Zone 통제:
+
+- Z1 의료법 제27조: 기관 지정, 직접 연결, 예약, 결제 기능 없음
+- Z2 노인장기요양보험법: 등급 판정이나 급여 결정을 수행하지 않음
+- Z3 개인정보보호법: 실명, 연락처, 주민번호, 상세주소 미수집
+- Z4 HIRA 데이터 절차: 현재 버전은 가명 데이터와 공개 자료만 사용하며 정식 절차 외 데이터 활용 없음
 
 `validateLegalSafety`는 8개 정규식을 적용합니다. 위반 문구가 있으면 가족 안내문 본문을 표시하지 않고 `안전선 검사 실패 - 담당자 검토 필요`로 대체합니다. `npm run check:legal`은 앱, 컴포넌트, 라이브러리, mock 데이터, 실제 렌더링 DOM, API 응답을 함께 검사합니다.
 

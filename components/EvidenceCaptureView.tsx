@@ -1,9 +1,6 @@
 import { CalendarDays } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
-import { CareCandidateList } from "./CareCandidateList";
-import { FamilyGuidePanel } from "./FamilyGuidePanel";
-import { RiskResultCard } from "./RiskResultCard";
-import { comorbidityLabels, diagnosisLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
+import { bandLabels, categoryLabels, comorbidityLabels, diagnosisLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
 import type { CareResource, FamilyGuide, Patient, RiskResult } from "@/lib/types";
 
 type EvidenceCaptureViewProps = {
@@ -23,16 +20,18 @@ export function EvidenceCaptureView({
   foreignGuide,
   compact
 }: EvidenceCaptureViewProps) {
+  const safetyPass = koreanGuide.safety.pass && foreignGuide.safety.pass;
+
   return (
     <section
       id="evidence"
-      className={`mt-6 rounded-md border border-line bg-white p-4 shadow-soft ${compact ? "" : "capture-watermark"}`}
+      className={`mx-auto mt-6 w-full max-w-[794px] rounded-md border border-line bg-white p-3 shadow-soft print:break-inside-avoid ${compact ? "" : "capture-watermark"}`}
     >
       <CaptureCaption
-        title="통합 사례 화면"
-        description="입력 항목부터 모델 결과, 안전선, 가족 안내문까지 한 화면에 표시합니다."
+        title="별첨5 캡처 화면"
+        description="작성일: 2026-05-23 / 가명 데이터(P003) / 모델 버전: CB72-RULE-XGB-SURROGATE-2026.05 / 안전선 검사: 통과 / 본 화면은 심평원 보건의료빅데이터·AI 활용 창업경진대회 시제품 증빙(별첨5)용입니다."
       />
-      <div className="mb-4 flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-teal">CareBridge72</p>
           <h2 className="text-xl font-black text-ink">사례 검토 요약</h2>
@@ -43,10 +42,13 @@ export function EvidenceCaptureView({
             2026-05-23
           </span>
           <span className="rounded-md border border-line bg-white px-2 py-1">가명 사례 {patient.id}</span>
+          <span className="rounded-md border border-line bg-white px-2 py-1">
+            안전선 검사: {safetyPass ? "통과" : "검토 필요"}
+          </span>
         </div>
       </div>
 
-      <div className="mb-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-3 grid gap-2 text-sm sm:grid-cols-2 md:grid-cols-4">
         <InfoCell label="나이·퇴원일" value={`${patient.age}세 · ${patient.dischargeDate}`} />
         <InfoCell label="진단군" value={diagnosisLabels[patient.primaryDiagnosisGroup]} />
         <InfoCell label="지역" value={regionLabels[patient.region]} />
@@ -61,15 +63,71 @@ export function EvidenceCaptureView({
       </div>
 
       {!compact ? (
-        <div className="grid gap-4">
-          <RiskResultCard risk={risk} patient={patient} showScreenNote />
-          <CareCandidateList
-            candidates={candidates}
-            regionLabel={candidates[0]?.regionLabel ?? ""}
-            rationale="현재 사례의 후보 정보와 위험 신호를 함께 검토합니다."
-            showScreenNote
-          />
-          <FamilyGuidePanel koreanGuide={koreanGuide} foreignGuide={foreignGuide} showScreenNote />
+        <div className="grid gap-2">
+          <section id="risk" className="rounded-md border border-line p-2 print:break-inside-avoid">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-teal">화면 02 · 위험 검토</p>
+                <h3 className="mt-1 text-lg font-black text-ink">재입원 위험 신호 {bandLabels[risk.band]} {risk.score}점</h3>
+                <p className="mt-1 text-sm text-slate-600">모델 버전 {risk.modelVersion} · 설명 신뢰도 {Math.round(risk.confidence * 100)}%</p>
+              </div>
+              <div className="rounded-md border border-cranberry bg-rose-50 px-4 py-2 text-right text-cranberry">
+                <p className="text-xs font-bold">{bandLabels[risk.band]}</p>
+                <p className="text-3xl font-black">{risk.score}</p>
+              </div>
+            </div>
+            <ol className="mt-2 grid gap-2 md:grid-cols-3">
+              {risk.reasons.map((reason) => (
+                <li key={reason} className="rounded-md bg-panel p-2 text-xs leading-5 text-slate-700">
+                  {reason}
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section id="candidates" className="rounded-md border border-line p-2 print:break-inside-avoid">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-teal">화면 03 · 자원 후보</p>
+                <h3 className="mt-1 text-lg font-black text-ink">지역 돌봄 자원 후보 정보</h3>
+              </div>
+              <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-bold text-slate-700">
+                {candidates[0]?.regionLabel ?? ""} · {candidates.length}건
+              </span>
+            </div>
+            <div className="grid gap-2 md:grid-cols-5">
+              {candidates.slice(0, 5).map((candidate) => (
+                <article key={candidate.id} className="rounded-md border border-line bg-panel p-2 text-xs">
+                  <p className="font-bold text-teal">{categoryLabels[candidate.category]}</p>
+                  <p className="font-semibold text-ink">{candidate.name}</p>
+                  <p className="text-slate-600">{candidate.distanceKm.toFixed(1)}km · {candidate.operatingWindow}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="guide" className="rounded-md border border-line p-2 print:break-inside-avoid">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-teal">화면 04 · 가족 안내</p>
+                <h3 className="mt-1 text-lg font-black text-ink">가족 안내문 및 안전선 검사</h3>
+              </div>
+              <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-bold text-slate-700">
+                {safetyPass ? "통과" : "담당자 검토 필요"}
+              </span>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              <GuideExcerpt title="한국어 안내" text={koreanGuide.text} />
+              <GuideExcerpt title="외국어 안내" text={foreignGuide.text} />
+            </div>
+            <p className="mt-2 rounded-md bg-panel p-2 text-xs leading-5 text-slate-600">
+              출처·갱신일: 공공 안내문 템플릿 (보건복지부·HIRA, {koreanGuide.updatedAt} 기준)
+            </p>
+          </section>
+
+          <div className="rounded-md border border-teal bg-teal/5 p-2 text-sm font-bold leading-6 text-ink">
+            최종 판단은 시군 통합돌봄 전담조직 또는 병원 사회사업실 담당자가 수행합니다.
+          </div>
         </div>
       ) : (
         <p className="text-sm leading-6 text-slate-600">
@@ -80,9 +138,18 @@ export function EvidenceCaptureView({
   );
 }
 
+function GuideExcerpt({ title, text }: { title: string; text: string }) {
+  return (
+    <article className="rounded-md border border-line bg-panel p-2 text-xs leading-5 text-slate-700">
+      <p className="mb-1 font-bold text-ink">{title}</p>
+      <p>{text.split("\n").slice(0, 2).join(" ").slice(0, 190)}...</p>
+    </article>
+  );
+}
+
 function InfoCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-line bg-panel p-3">
+    <div className="rounded-md border border-line bg-panel p-2">
       <p className="text-xs font-bold text-slate-500">{label}</p>
       <p className="mt-1 font-semibold text-ink">{value}</p>
     </div>

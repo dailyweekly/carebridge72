@@ -62,7 +62,8 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
   );
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl"}`}>
+      {!captureMode ? (
       <section className="mb-5 flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-sm font-semibold text-teal">CareBridge72</p>
@@ -77,8 +78,10 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
           <StatusPill icon={<ClipboardCheck size={15} />} text="안전검사 통과" />
           <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 화면" />
           <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
+          {!captureMode ? <StatusLink href="/capture" text="캡처 화면" /> : null}
         </div>
       </section>
+      ) : null}
 
       {!captureMode ? <DemoFlow /> : null}
 
@@ -163,6 +166,17 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
       return [entry, ...current].slice(0, 6);
     });
   }
+}
+
+function StatusLink({ href, text }: { href: string; text: string }) {
+  return (
+    <a
+      className="flex min-h-9 items-center justify-center rounded-md border border-line bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm"
+      href={href}
+    >
+      {text}
+    </a>
+  );
 }
 
 function StatusPill({ icon, text }: { icon: ReactNode; text: string }) {

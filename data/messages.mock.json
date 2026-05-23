@@ -6,9 +6,13 @@
     "default": "Hello. During the first 72 hours after discharge, please check meals, hydration, rest, and preparation for scheduled follow-up visits. If urgent warning signs appear, such as severe shortness of breath, strong dizziness, or sudden change in consciousness, contact emergency services or the public care desk immediately. Today's checklist is meal readiness, mobility, and caregiver contact availability. The public officer will review candidate resource information and provide separate guidance as needed."
   },
   "vi": {
-    "default": "Xin chao. Trong 72 gio dau sau khi xuat vien, vui long kiem tra bua an, nuoc uong, nghi ngoi va viec chuan bi cho lich tai kham. Neu co dau hieu khan cap nhu kho tho nang, chong mat nhieu hoac thay doi y thuc dot ngot, hay lien he dich vu cap cuu hoac bo phan cham soc cong. Danh sach hom nay gom kha nang an uong, di chuyen va lien lac voi nguoi cham soc. Can bo phu trach se xem xet thong tin nguon luc ung vien va huong dan rieng khi can."
+    "default": "Xin chao. Trong 72 gio dau sau khi xuat vien, vui long kiem tra bua an, nuoc uong, nghi ngoi va viec chuan bi cho lich tai kham. Neu co dau hieu khan cap nhu kho tho nang, chong mat nhieu hoac thay doi y thuc dot ngot, hay lien he dich vu cap cuu hoac bo phan cham soc cong. Danh sach hom nay gom kha nang an uong, di chuyen va lien lac voi nguoi cham soc. Can bo phu trach se xem xet thong tin nguon luc ung vien va huong dan rieng khi can.",
+    "COPD": "Xin chao. Trong 72 gio dau sau khi xuat vien, vui long ghi lai tinh trang tho, kha nang an uong, nghi ngoi va viec chuan bi cho lich hen. Neu kho tho nang hon, chong mat nhieu hoac y thuc thay doi dot ngot, hay lien he dich vu cap cuu hoac bo phan cham soc cong. Hom nay can kiem tra kha nang di chuyen trong nha, nguoi co the lien lac va viec sap xep bua an. Can bo phu trach se xem xet thong tin nguon luc ung vien va huong dan rieng khi can.",
+    "PNEUMONIA": "Xin chao. Trong 72 gio dau sau khi xuat vien, vui long theo doi viec an uong, nghi ngoi, than nhiet neu da duoc huong dan va kha nang di lai an toan. Neu kho tho nang, sot cao keo dai, chong mat nhieu hoac y thuc thay doi dot ngot, hay lien he dich vu cap cuu hoac bo phan cham soc cong. Hom nay can kiem tra bua an, uong nuoc, nguoi lien lac va lich hen sap toi."
   },
   "zh": {
-    "default": "您好。出院后的前72小时内，请按既定安排确认用餐、饮水、休息以及复诊准备。如出现严重呼吸困难、明显头晕或意识突然变化等紧急信号，请立即联系急救服务或公共照护窗口。今天的确认事项包括能否进食、能否移动以及照护者是否可以联系。公共负责人会审阅候选资源信息，并在需要时另行提供说明。"
+    "default": "您好。出院后的前72小时内，请按既定安排确认用餐、饮水、休息以及复诊准备。如出现严重呼吸困难、明显头晕或意识突然变化等紧急信号，请立即联系急救服务或公共照护窗口。今天的确认事项包括能否进食、能否移动以及照护者是否可以联系。公共负责人会审阅候选资源信息，并在需要时另行提供说明。",
+    "COPD": "您好。出院后的前72小时内，请确认呼吸状态、用餐饮水、休息以及复诊准备。如出现严重呼吸困难、明显头晕或意识突然变化等紧急信号，请立即联系急救服务或公共照护窗口。今天请确认室内移动是否安全、是否有人可以联系、是否需要餐食或出行方面的公共支持。",
+    "PNEUMONIA": "您好。出院后的前72小时内，请确认用餐饮水、休息、体温记录以及安全移动情况。如出现严重呼吸困难、持续高热、明显头晕或意识突然变化等紧急信号，请立即联系急救服务或公共照护窗口。今天请确认餐食准备、补水、联系人以及后续预约准备。"
   }
 }
