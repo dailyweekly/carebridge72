@@ -9,13 +9,13 @@ const captureDir = path.join(root, "captures");
 const host = "127.0.0.1";
 const port = 3101;
 const spawnedBaseUrl = `http://${host}:${port}`;
-const reusableBaseUrl = process.env.CAPTURE_BASE_URL ?? `http://${host}:3000`;
+const reusableBaseUrl = process.env.CAPTURE_BASE_URL;
 const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 
 await fs.mkdir(captureDir, { recursive: true });
 
-const shouldReuseServer = await isServerReady(`${reusableBaseUrl}/capture`, 2000);
-const baseUrl = shouldReuseServer ? reusableBaseUrl : spawnedBaseUrl;
+const shouldReuseServer = reusableBaseUrl ? await isServerReady(`${reusableBaseUrl}/capture`, 2000) : false;
+const baseUrl = shouldReuseServer && reusableBaseUrl ? reusableBaseUrl : spawnedBaseUrl;
 const server = shouldReuseServer
   ? null
   : spawn(process.execPath, [nextBin, "dev", "--hostname", host, "--port", String(port)], {

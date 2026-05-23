@@ -55,18 +55,20 @@ function walk(current) {
 
 async function scanRuntimeOutputs() {
   const host = "127.0.0.1";
-  let baseUrl = `http://${host}:3000`;
+  const reusableBaseUrl = process.env.LEGAL_CHECK_BASE_URL;
+  let baseUrl = reusableBaseUrl ?? `http://${host}:3102`;
   let server;
 
-  if (!(await isServerReady(`${baseUrl}/capture`))) {
+  if (!reusableBaseUrl) {
     const port = 3102;
-    baseUrl = `http://${host}:${port}`;
     const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
     server = spawn(process.execPath, [nextBin, "dev", "--hostname", host, "--port", String(port)], {
       cwd: root,
       stdio: "ignore",
       detached: false
     });
+  } else if (!(await isServerReady(`${baseUrl}/capture`))) {
+    throw new Error(`LEGAL_CHECK_BASE_URL is not ready: ${baseUrl}`);
   }
 
   try {

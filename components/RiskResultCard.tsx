@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle2, Gauge, Info } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
+import { assessCaseReview } from "@/lib/case-review";
 import { bandLabels, diagnosisLabels, regionLabels } from "@/lib/labels";
 import type { Patient, RiskResult } from "@/lib/types";
 
@@ -10,6 +11,7 @@ type RiskResultCardProps = {
 };
 
 export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskResultCardProps) {
+  const reviewSignal = assessCaseReview(patient, risk);
   const tone =
     risk.band === "HIGH"
       ? "border-cranberry bg-rose-50 text-cranberry"
@@ -35,12 +37,21 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
             {patient.id} · {regionLabels[patient.region]} · {diagnosisLabels[patient.primaryDiagnosisGroup]}
           </p>
         </div>
-        <div className={`flex min-w-48 items-center justify-between rounded-md border px-4 py-3 ${tone}`}>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-normal">{bandLabels[risk.band]}</p>
-            <p className="text-3xl font-black">{risk.score}</p>
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_192px]">
+          <div className="rounded-md border border-line bg-panel px-3 py-2 text-sm">
+            <p className="text-xs font-bold text-slate-500">사례 검토 상태</p>
+            <p className="mt-1 font-bold text-ink">{reviewSignal.windowStatus}</p>
+            <p className="mt-1 text-xs text-slate-600">
+              퇴원 후 {reviewSignal.elapsedHours}h · {formatRemainingHours(reviewSignal.remainingHours)}
+            </p>
           </div>
-          {risk.band === "HIGH" ? <AlertTriangle size={28} /> : <CheckCircle2 size={28} />}
+          <div className={`flex min-w-48 items-center justify-between rounded-md border px-4 py-3 ${tone}`}>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-normal">{bandLabels[risk.band]}</p>
+              <p className="text-3xl font-black">{risk.score}</p>
+            </div>
+            {risk.band === "HIGH" ? <AlertTriangle size={28} /> : <CheckCircle2 size={28} />}
+          </div>
         </div>
       </div>
 
@@ -79,4 +90,9 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
       </div>
     </section>
   );
+}
+
+function formatRemainingHours(hours: number) {
+  if (hours < 0) return `72시간 초과 ${Math.abs(hours)}h`;
+  return `잔여 ${hours}h`;
 }

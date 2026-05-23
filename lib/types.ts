@@ -102,7 +102,7 @@ export type ReviewCase = {
   id: string;
   patientId: string;
   owner: "시군 통합돌봄" | "병원 사회사업실";
-  stage: "접수" | "검토 중" | "가족 안내 준비" | "담당자 판단 대기";
+  stage: "접수" | "검토 중" | "가족 안내 준비" | "담당자 판단 대기" | "사후 확인";
   dueHours: number;
   channel: "B2G" | "B2B";
 };

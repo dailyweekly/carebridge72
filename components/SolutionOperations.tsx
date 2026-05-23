@@ -1,6 +1,7 @@
 import { Building2, Database, FileCheck2, GitBranch, ShieldCheck, Sparkles, UsersRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { bandLabels, diagnosisLabels, regionLabels } from "@/lib/labels";
+import { assessCaseReview, sortCasesByReviewPriority } from "@/lib/case-review";
 import { calculateRisk } from "@/lib/risk";
 import type { CareResource, Patient, PublicDataSource, ReviewCase, RiskResult } from "@/lib/types";
 
@@ -115,16 +116,29 @@ function ModelCardPanel({ activeRisk }: Pick<SolutionOperationsProps, "activeRis
 }
 
 function CaseQueuePanel({ patients, cases }: Pick<SolutionOperationsProps, "patients" | "cases">) {
+  const sortedCases = sortCasesByReviewPriority(cases, patients, calculateRisk);
+
   return (
     <section className="rounded-md border border-line bg-white p-4 shadow-soft">
-      <div className="mb-4 flex items-center gap-2">
-        <UsersRound size={20} className="text-teal" />
-        <h2 className="text-lg font-bold text-ink">담당자 업무 대기열</h2>
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <UsersRound size={20} className="text-teal" />
+            <h2 className="text-lg font-bold text-ink">담당자 업무 대기열</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            퇴원 후 72시간 창, 위험 신호, 돌봄 공백, 언어 지원 필요성을 합산해 우선순위를 정렬합니다.
+          </p>
+        </div>
+        <span className="rounded-md border border-line bg-panel px-3 py-2 text-xs font-bold text-slate-700">
+          우선순위 자동 정렬
+        </span>
       </div>
       <div className="grid gap-3 lg:grid-cols-5">
-        {cases.map((item) => {
+        {sortedCases.map((item) => {
           const patient = patients.find((entry) => entry.id === item.patientId);
           const risk = calculateRisk(patient);
+          const signal = patient ? assessCaseReview(patient, risk, item) : null;
           return (
             <article key={item.id} className="rounded-md border border-line p-3">
               <div className="mb-2 flex items-start justify-between gap-2">
@@ -139,9 +153,28 @@ function CaseQueuePanel({ patients, cases }: Pick<SolutionOperationsProps, "pati
               <p className="text-sm text-slate-700">
                 {patient ? `${regionLabels[patient.region]} · ${diagnosisLabels[patient.primaryDiagnosisGroup]}` : "가명 정보 없음"}
               </p>
-              <p className="mt-2 rounded bg-panel px-2 py-1 text-xs font-semibold text-slate-700">{item.stage}</p>
+              <div className="mt-3 grid gap-2">
+                <div className="flex flex-wrap gap-1.5">
+                  <span className={getWindowBadgeClass(signal?.windowStatus)}>
+                    {signal?.windowStatus ?? item.stage}
+                  </span>
+                  <span className="rounded bg-panel px-2 py-1 text-xs font-semibold text-slate-700">{item.stage}</span>
+                </div>
+                <p className="text-xs leading-5 text-slate-600">
+                  {signal
+                    ? `퇴원 후 ${signal.elapsedHours}h · ${formatRemainingHours(signal.remainingHours)}`
+                    : `D-${item.dueHours}h`}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {(signal?.reasons ?? []).slice(0, 3).map((reason) => (
+                    <span key={reason} className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                      {reason}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <p className="mt-2 text-xs text-slate-600">
-                {item.owner} · D-{item.dueHours}h · {item.channel}
+                {item.owner} · {item.channel} · 우선순위 {signal?.priorityScore ?? "-"}
               </p>
             </article>
           );
@@ -149,6 +182,19 @@ function CaseQueuePanel({ patients, cases }: Pick<SolutionOperationsProps, "pati
       </div>
     </section>
   );
+}
+
+function getWindowBadgeClass(status?: string) {
+  const base = "rounded px-2 py-1 text-xs font-bold";
+  if (status === "검토 필요") return `${base} bg-cranberry/10 text-cranberry`;
+  if (status === "일반 확인") return `${base} bg-teal/10 text-teal`;
+  if (status === "72시간 초과") return `${base} bg-slate-200 text-slate-700`;
+  return `${base} bg-panel text-slate-700`;
+}
+
+function formatRemainingHours(hours: number) {
+  if (hours < 0) return `72시간 초과 ${Math.abs(hours)}h`;
+  return `잔여 ${hours}h`;
 }
 
 function ModelGovernancePanel({
@@ -257,6 +303,14 @@ function PolicyAnalyticsPanel({
   const multilingualCount = patients.filter((patient) => patient.preferredLanguage !== "ko").length;
   const highRatio = Math.round((highCount / patients.length) * 100);
   const multilingualRatio = Math.round((multilingualCount / patients.length) * 100);
+  const signals = cases
+    .map((item) => {
+      const patient = patients.find((entry) => entry.id === item.patientId);
+      return patient ? assessCaseReview(patient, calculateRisk(patient), item) : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const reviewNeededCount = signals.filter((item) => item.windowStatus === "검토 필요").length;
+  const expiredCount = signals.filter((item) => item.windowStatus === "72시간 초과").length;
 
   return (
     <section className="rounded-md border border-line bg-white p-4 shadow-soft">
@@ -267,12 +321,12 @@ function PolicyAnalyticsPanel({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric icon={<FileCheck2 size={18} />} label="72시간 검토 사례" value={`${cases.length}건`} />
         <Metric icon={<UsersRound size={18} />} label="HIGH 신호 비율" value={`${highCount}/${patients.length}`} />
+        <Metric icon={<ShieldCheck size={18} />} label="검토 필요 사례" value={`${reviewNeededCount}건`} />
         <Metric icon={<Database size={18} />} label="활성 지역 자원" value={`${activeRegionResources}건`} />
-        <Metric icon={<Building2 size={18} />} label="시군 커버리지" value={`${uniqueRegions}개 시군`} />
       </div>
       <p className="mt-3 text-sm leading-6 text-slate-600">
-        B2G 중심 사례 {b2gCount}건을 기준으로 담당자 검토 시간, 안내 일관성, 다국어 사용 비율을 누적해
-        분기 정책 리포트로 확장하는 구조입니다.
+        B2G 중심 사례 {b2gCount}건과 시군 커버리지 {uniqueRegions}개를 기준으로 담당자 검토 시간,
+        안내 일관성, 72시간 초과 사례 {expiredCount}건을 누적해 분기 정책 리포트로 확장하는 구조입니다.
       </p>
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
         <BarMetric label="HIGH 신호 비율" value={highRatio} />
