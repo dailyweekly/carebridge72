@@ -1,0 +1,70 @@
+# 케어브릿지72
+
+퇴원 후 72시간 동안 시군 통합돌봄 전담조직과 병원 사회사업실 담당자가 위험 신호, 지역 돌봄 자원 후보 정보, 다국어 가족 안내문, 정책 KPI를 검토하는 담당자 보조형 SaaS입니다. 현재 버전은 실제 환자 데이터, 외부 의료 API, 데이터베이스를 사용하지 않습니다.
+
+## 1. 실행 방법
+
+```bash
+npm install
+npm run dev
+```
+
+브라우저에서 `http://localhost:3000`을 엽니다. 통합 사례 화면은 `http://localhost:3000/capture`입니다.
+
+검증 명령:
+
+```bash
+npm run test
+npm run check:legal
+npm run build
+npm run verify:submission
+```
+
+캡처 산출물 생성:
+
+```bash
+npm run capture
+```
+
+`captures/01-input.png`, `captures/02-risk.png`, `captures/03-candidates.png`, `captures/04-guide.png`, `captures/05-full.png`가 생성됩니다.
+
+## 2. 기술 스택
+
+Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다.
+
+## 3. 데모 시나리오
+
+1. 0:00-0:35: `P003` 가명 환자(78세, 심부전군, 수원시, 단독 거주, 돌봄자 없음)의 8항목 입력을 확인합니다.
+2. 0:35-1:10: 재입원 위험 신호 카드에서 HIGH 78점, 근거 3개, 해석 가능 규칙 가중치, 모델 버전을 확인합니다.
+3. 1:10-1:50: 수원시 지역의 방문간호, 재가요양, 주야간보호 등 돌봄 자원 후보 정보를 확인합니다.
+4. 1:50-2:25: 한국어와 영어 또는 베트남어·중국어 가족 안내문을 확인하고 복사 버튼을 누릅니다.
+5. 2:25-2:45: 담당자 업무 대기열, 3-모델 구조, 공공데이터 출처·확보 단계를 보여줍니다.
+6. 2:45-3:00: 상단·하단 안전선 배너와 4-Zone 통제 패널을 보여주며 최종 판단은 공공 담당자가 수행한다는 점을 강조합니다.
+
+고정 시연 URL은 `http://localhost:3000/demo`입니다.
+
+## 4. mock data 설명
+
+`data/patients.mock.json`: P001-P005 가명 환자 8항목 정보입니다. 성명, 주민번호, 전화번호, 상세주소는 없습니다.
+
+`data/care_resources.mock.json`: 경기도 4개 시군별 가명 돌봄 자원 후보 정보 20건입니다. 기관 실명, 예약, 결제, 직접 연결 정보는 없습니다.
+
+`data/risk_rules.json`: 나이, 진단군, 동반질환, 돌봄자 유무를 합산하는 재현 가능한 위험 점수 규칙입니다.
+
+`data/messages.mock.json`: 한국어, 영어, 베트남어, 중국어 가족 안내문 템플릿입니다. 진단명, 약물명, 용량 지시 토큰은 넣지 않습니다.
+
+`data/legal_safety_rules.json`: 안내문과 UI 문구 검사용 정규식 8개입니다.
+
+`data/public_sources.mock.json`: HIRA, K-OMOP, 보건복지부 통합돌봄, 장기요양 인프라, 지자체 사회복지시설 데이터의 출처·활용 방식·확보 단계를 표시합니다.
+
+`data/review_cases.mock.json`: 담당자 업무 대기열과 B2G/B2B 사례 흐름을 보여주는 가명 사례입니다.
+
+`docs/model-card.md`: 3-모델의 입력, 출력, 한계, 향후 평가 지표를 정리한 모델 카드입니다.
+
+## 5. 법률 안전선
+
+케어브릿지72는 특정 의료기관·장기요양기관을 직접 추천·알선·예약·결제하지 않습니다. 화면은 공공 담당자가 검토할 후보 정보와 위험 신호를 제공하는 데 한정됩니다.
+
+`validateLegalSafety`는 8개 정규식을 적용합니다. 위반 문구가 있으면 가족 안내문 본문을 표시하지 않고 `안전선 검사 실패 - 담당자 검토 필요`로 대체합니다. `npm run check:legal`은 앱, 컴포넌트, 라이브러리, mock 데이터, 실제 렌더링 DOM, API 응답을 함께 검사합니다.
+
+비고 입력란은 주민번호, 전화번호, 상세주소 패턴을 감지하면 값을 반영하지 않고 감사 로그에 차단 이벤트를 남깁니다.

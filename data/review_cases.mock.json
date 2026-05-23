@@ -1,0 +1,7 @@
+[
+  { "id": "CASE-2401", "patientId": "P003", "owner": "시군 통합돌봄", "stage": "담당자 판단 대기", "dueHours": 18, "channel": "B2G" },
+  { "id": "CASE-2402", "patientId": "P001", "owner": "병원 사회사업실", "stage": "가족 안내 준비", "dueHours": 24, "channel": "B2B" },
+  { "id": "CASE-2403", "patientId": "P004", "owner": "시군 통합돌봄", "stage": "검토 중", "dueHours": 32, "channel": "B2G" },
+  { "id": "CASE-2404", "patientId": "P002", "owner": "병원 사회사업실", "stage": "접수", "dueHours": 45, "channel": "B2B" },
+  { "id": "CASE-2405", "patientId": "P005", "owner": "시군 통합돌봄", "stage": "검토 중", "dueHours": 51, "channel": "B2G" }
+]

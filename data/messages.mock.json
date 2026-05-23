@@ -1,0 +1,14 @@
+{
+  "ko": {
+    "default": "안녕하세요. 퇴원 후 첫 72시간 동안은 정해진 일정에 맞춰 식사, 수분 섭취, 휴식, 외래 방문 준비를 확인해주세요. 호흡 곤란, 심한 어지러움, 갑작스러운 의식 변화처럼 응급 신호가 보이면 즉시 119 또는 담당 공공 창구에 연락해주세요. 오늘 확인할 항목은 식사 가능 여부, 이동 가능 여부, 보호자 연락 가능 여부입니다. 공공 담당자는 후보 자원 정보를 검토한 뒤 필요한 안내를 별도로 전달합니다."
+  },
+  "en": {
+    "default": "Hello. During the first 72 hours after discharge, please check meals, hydration, rest, and preparation for scheduled follow-up visits. If urgent warning signs appear, such as severe shortness of breath, strong dizziness, or sudden change in consciousness, contact emergency services or the public care desk immediately. Today's checklist is meal readiness, mobility, and caregiver contact availability. The public officer will review candidate resource information and provide separate guidance as needed."
+  },
+  "vi": {
+    "default": "Xin chao. Trong 72 gio dau sau khi xuat vien, vui long kiem tra bua an, nuoc uong, nghi ngoi va viec chuan bi cho lich tai kham. Neu co dau hieu khan cap nhu kho tho nang, chong mat nhieu hoac thay doi y thuc dot ngot, hay lien he dich vu cap cuu hoac bo phan cham soc cong. Danh sach hom nay gom kha nang an uong, di chuyen va lien lac voi nguoi cham soc. Can bo phu trach se xem xet thong tin nguon luc ung vien va huong dan rieng khi can."
+  },
+  "zh": {
+    "default": "您好。出院后的前72小时内，请按既定安排确认用餐、饮水、休息以及复诊准备。如出现严重呼吸困难、明显头晕或意识突然变化等紧急信号，请立即联系急救服务或公共照护窗口。今天的确认事项包括能否进食、能否移动以及照护者是否可以联系。公共负责人会审阅候选资源信息，并在需要时另行提供说明。"
+  }
+}
