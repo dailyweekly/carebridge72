@@ -11,10 +11,19 @@ import { FamilyGuidePanel } from "./FamilyGuidePanel";
 import { EvidenceCaptureView } from "./EvidenceCaptureView";
 import { DemoFlow } from "./DemoFlow";
 import { SolutionOperations } from "./SolutionOperations";
+import { CaseDecisionPanel } from "./CaseDecisionPanel";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
-import type { AuditLogEntry, CareResource, Language, Patient, PublicDataSource, ReviewCase } from "@/lib/types";
+import type {
+  AuditLogEntry,
+  CandidateReviewStatus,
+  CareResource,
+  Language,
+  Patient,
+  PublicDataSource,
+  ReviewCase
+} from "@/lib/types";
 
 type DemoDashboardProps = {
   initialPatients: Patient[];
@@ -30,6 +39,7 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
   const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>(
     initial.preferredLanguage === "vi" ? "vi" : "en"
   );
+  const [candidateReviewState, setCandidateReviewState] = useState<Record<string, CandidateReviewStatus>>({});
   const [logs, setLogs] = useState<AuditLogEntry[]>([
     {
       id: "LOG-001",
@@ -79,6 +89,7 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
             patients={initialPatients}
             onChange={(nextPatient) => {
               setPatient(nextPatient);
+              setCandidateReviewState({});
               appendLog("담당자 입력", `${nextPatient.id} 가명 사례 입력값을 갱신했습니다.`);
             }}
             onPrivacyBlocked={(detail) => appendLog("민감정보 차단", detail)}
@@ -88,17 +99,27 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
           <section className="grid gap-5">
             <RiskResultCard risk={risk} patient={patient} />
             <CareCandidateList
+              key={patient.id}
               candidates={resourceMatch.candidates}
               regionLabel={resourceMatch.candidates[0]?.regionLabel ?? ""}
               rationale={resourceMatch.rationale}
-              onReviewChange={(candidate, status) =>
-                appendLog("후보 카드 검토", `${candidate.name}: ${status} 상태로 표시했습니다.`)
-              }
+              onReviewChange={(candidate, status) => {
+                setCandidateReviewState((current) => ({ ...current, [candidate.id]: status }));
+                appendLog("후보 카드 검토", `${candidate.name}: ${status} 상태로 표시했습니다.`);
+              }}
             />
             <FamilyGuidePanel
               koreanGuide={koreanGuide}
               foreignGuide={foreignGuide}
               onCopy={() => appendLog("안내문 복사", `${patient.id} 가족 안내문을 클립보드로 복사했습니다.`)}
+            />
+            <CaseDecisionPanel
+              patient={patient}
+              risk={risk}
+              candidates={resourceMatch.candidates}
+              candidateReviewState={candidateReviewState}
+              guideSafetyPass={koreanGuide.safety.pass && foreignGuide.safety.pass}
+              onDecisionCommit={(detail) => appendLog("담당자 판단", detail)}
             />
           </section>
         </div>
