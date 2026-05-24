@@ -1,6 +1,17 @@
 "use client";
 
-import { ArrowRight, Bot, CheckCircle2, ClipboardCheck, Copy, FileText, Languages, Loader2, Wand2 } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  ClipboardCheck,
+  Copy,
+  FileText,
+  Languages,
+  Loader2,
+  LockKeyhole,
+  Wand2
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { CareCandidateList } from "./CareCandidateList";
 import { PatientInputForm } from "./PatientInputForm";
@@ -18,9 +29,13 @@ type WorkspaceClientProps = {
 };
 
 type DraftState = Record<DraftKind, DraftResponse | null>;
+const workspaceAccessCode = "7272";
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
   const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
   const [patient, setPatient] = useState<Patient>(initial);
   const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>("en");
   const [memo, setMemo] = useState("72시간 내 전화 확인 후 식사·이동 공백과 가족 연락 가능 여부를 확인합니다.");
@@ -36,6 +51,54 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
   );
   const signal = useMemo(() => assessCaseReview(patient, risk), [patient, risk]);
   const activeDraftCount = Number(Boolean(drafts.handoff)) + Number(Boolean(drafts.family));
+
+  if (!accessGranted) {
+    return (
+      <main className="mx-auto flex min-h-[72vh] max-w-3xl items-center px-4 py-10 sm:px-6">
+        <section className="w-full rounded-md border border-line bg-white p-6 shadow-soft">
+          <div className="mb-5 flex items-start gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-teal text-white">
+              <LockKeyhole size={22} />
+            </span>
+            <div>
+              <p className="text-sm font-bold text-teal">CareBridge72 Workspace</p>
+              <h1 className="mt-1 text-2xl font-black text-ink">AI 작업 화면 접근 코드</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Claude API 토큰이 사용될 수 있는 화면입니다. 접근 코드를 입력하면 담당자 인계와 가족 안내 초안 화면으로 이동합니다.
+              </p>
+            </div>
+          </div>
+
+          <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]" onSubmit={submitAccessCode}>
+            <label className="grid gap-1">
+              <span className="text-xs font-bold text-slate-600">접근 코드</span>
+              <input
+                className="min-h-11 rounded-md border border-line px-3 py-2 text-lg font-bold tracking-normal"
+                type="password"
+                inputMode="numeric"
+                autoComplete="off"
+                value={accessCode}
+                onChange={(event) => {
+                  setAccessCode(event.target.value);
+                  setAccessError("");
+                }}
+              />
+            </label>
+            <button
+              className="mt-auto inline-flex min-h-11 items-center justify-center rounded-md bg-teal px-4 py-2 text-sm font-black text-white"
+              type="submit"
+            >
+              입장
+            </button>
+          </form>
+          {accessError ? <p className="mt-3 text-sm font-bold text-cranberry">{accessError}</p> : null}
+          <p className="mt-4 text-xs leading-5 text-slate-500">
+            데모 화면은 공개되어 있으며, 실제 초안 생성은 접근 코드 확인 후 사용할 수 있습니다.
+          </p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -189,7 +252,10 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
     try {
       const response = await fetch("/api/llm/draft", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          "x-carebridge-access-code": accessCode
+        },
         body: JSON.stringify({
           kind,
           patient,
@@ -207,6 +273,15 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
     } finally {
       setPendingKind(null);
     }
+  }
+
+  function submitAccessCode(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (accessCode.trim() !== workspaceAccessCode) {
+      setAccessError("접근 코드가 올바르지 않습니다.");
+      return;
+    }
+    setAccessGranted(true);
   }
 }
 
