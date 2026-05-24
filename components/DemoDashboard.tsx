@@ -78,6 +78,7 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
           <StatusPill icon={<ClipboardCheck size={15} />} text="안전검사 통과" />
           <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 화면" />
           <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
+          {!captureMode ? <StatusLink href="/workspace" text="AI 작업 화면" /> : null}
           {!captureMode ? <StatusLink href="/capture" text="캡처 화면" /> : null}
         </div>
       </section>

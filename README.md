@@ -9,12 +9,13 @@ npm install
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 엽니다. 고정 시연 화면은 `http://localhost:3000/demo`, 별첨 캡처 화면은 `http://localhost:3000/capture`입니다.
+브라우저에서 `http://localhost:3000`을 엽니다. 고정 시연 화면은 `http://localhost:3000/demo`, 실제 AI 문서화 작업 화면은 `http://localhost:3000/workspace`, 별첨 캡처 화면은 `http://localhost:3000/capture`입니다.
 
 Vercel 배포 URL:
 
 ```text
 https://carebridge72.vercel.app
+https://carebridge72.vercel.app/workspace
 https://carebridge72.vercel.app/capture
 ```
 
@@ -37,7 +38,7 @@ npm run capture
 
 ## 2. 기술 스택
 
-Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다.
+Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다. `/workspace`는 OpenAI Responses API 연동 준비가 된 LLM 문서화 보조 화면이며, `OPENAI_API_KEY`가 없으면 동일 입력 기반 예비 초안을 생성합니다.
 
 ## 3. 데모 시나리오
 
@@ -47,6 +48,8 @@ Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mo
 4. 1:35-2:15: 한국어와 영어 가족 안내문, 운영 원칙 확인 통과 상태를 확인합니다.
 5. 2:15-2:45: 담당자 판단 패널에서 권장 다음 행동, 체크리스트, 인계 요약을 확인합니다.
 6. 2:45-3:00: 운영 원칙 배너와 4-Zone 통제 패널을 보여주며 최종 판단은 공공 담당자가 수행한다는 점을 강조합니다.
+
+LLM 시연은 `/workspace`에서 진행합니다. 담당자가 사례를 선택한 뒤 `인계 요약 생성` 또는 `가족 안내 초안` 버튼을 누르면, 서버 route가 LLM 또는 예비 초안 생성기를 호출하고 운영 원칙 확인을 거친 결과만 표시합니다.
 
 고정 시연 URL은 `http://localhost:3000/demo`입니다.
 
