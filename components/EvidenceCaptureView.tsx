@@ -1,6 +1,7 @@
 import { CalendarDays } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
 import { bandLabels, categoryLabels, comorbidityLabels, diagnosisLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
+import { submissionEvidence } from "@/lib/submission-evidence";
 import type { CareResource, FamilyGuide, Patient, RiskResult } from "@/lib/types";
 
 type EvidenceCaptureViewProps = {
@@ -29,7 +30,7 @@ export function EvidenceCaptureView({
     >
       <CaptureCaption
         title="별첨5 캡처 화면"
-        description="작성일: 2026-05-23 / 가명 데이터(P003) / 모델 버전: CB72-RULE-XGB-SURROGATE-2026.05 / 운영 원칙 확인: 통과 / 본 화면은 심평원 보건의료빅데이터·AI 활용 창업경진대회 시제품 증빙(별첨5)용입니다."
+        description={`작성일: ${submissionEvidence.preparedAt} / 가명 데이터(P003) / 모델 버전: ${risk.modelVersion} / 운영 원칙 확인: 통과 / 본 화면은 ${submissionEvidence.purpose}용입니다.`}
       />
       <div className="mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -39,7 +40,7 @@ export function EvidenceCaptureView({
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
           <span className="inline-flex items-center gap-1 rounded-md border border-line bg-white px-2 py-1">
             <CalendarDays size={14} />
-            2026-05-23
+            {submissionEvidence.preparedAt}
           </span>
           <span className="rounded-md border border-line bg-white px-2 py-1">가명 사례 {patient.id}</span>
           <span className="rounded-md border border-line bg-white px-2 py-1">
