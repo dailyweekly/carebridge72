@@ -5,11 +5,11 @@ type FetchLike = typeof fetch;
 
 const defaultEndpoint = "https://apis.data.go.kr/B550928/searchLtcInsttService02/getLtcInsttSeachList02";
 
-const regionQuery: Record<Patient["region"], string> = {
-  "GG-SUWON": "수원",
-  "GG-GOYANG": "고양",
-  "GG-SEONGNAM": "성남",
-  "GG-ANSAN": "안산"
+const regionSggCodes: Record<Patient["region"], string[]> = {
+  "GG-SUWON": ["111", "113", "115", "117"],
+  "GG-GOYANG": ["281", "285", "287"],
+  "GG-SEONGNAM": ["131", "133", "135"],
+  "GG-ANSAN": ["271", "273"]
 };
 
 export async function fetchNhisLongTermCareResources(
@@ -22,18 +22,22 @@ export async function fetchNhisLongTermCareResources(
 
   const endpoint = env.NHIS_LTC_API_URL || defaultEndpoint;
   const fetcher = options.fetcher ?? fetch;
-  const url = new URL(endpoint);
-  url.searchParams.set("serviceKey", serviceKey);
-  url.searchParams.set("pageNo", "1");
-  url.searchParams.set("numOfRows", "30");
-  url.searchParams.set("_type", "xml");
-  url.searchParams.set("searchWrd", regionQuery[patient.region]);
 
   try {
-    const response = await fetcher(url);
-    if (!response.ok) return [];
-    const xml = await response.text();
-    return parseNhisLtcXml(xml, patient.region);
+    const responses = await Promise.all(
+      regionSggCodes[patient.region].map(async (siGunGuCd) => {
+        const url = new URL(endpoint);
+        url.searchParams.set("serviceKey", serviceKey);
+        url.searchParams.set("pageNo", "1");
+        url.searchParams.set("numOfRows", "15");
+        url.searchParams.set("siDoCd", "41");
+        url.searchParams.set("siGunGuCd", siGunGuCd);
+        const response = await fetcher(url);
+        if (!response.ok) return "";
+        return response.text();
+      })
+    );
+    return responses.flatMap((xml) => parseNhisLtcXml(xml, patient.region)).slice(0, 20);
   } catch {
     return [];
   }
@@ -49,7 +53,7 @@ export function parseNhisLtcXml(xml: string, region: Patient["region"]): CareRes
 function toCareResource(itemXml: string, region: Patient["region"], index: number): CareResource | null {
   const name = firstTag(itemXml, ["adminNm", "ltcInsttNm", "insttNm", "longTermAdminNm", "기관명"]);
   if (!name) return null;
-  const rawType = firstTag(itemXml, ["adminPttnCdNm", "ltcInsttPttnNm", "serviceType", "급여종류"]) || "";
+  const rawType = firstTag(itemXml, ["adminPttnCdNm", "ltcInsttPttnNm", "serviceType", "급여종류", "adminPttnCd"]) || "";
   const category = inferCategory(`${name} ${rawType}`);
   const regionLabel = regionLabels[region];
 
