@@ -3,6 +3,7 @@ import {
   Building2,
   CheckCircle2,
   ClipboardCheck,
+  GitCompareArrows,
   FileText,
   LockKeyhole,
   ShieldCheck,
@@ -48,6 +49,21 @@ const readinessItems = [
   "NHIS 장기요양기관 검색 API와 HIRA 병원정보서비스 연동 준비",
   "가명 데이터 기반 시연, 민감정보 입력 차단, 운영 원칙 검사",
   "HIRA 맞춤형/K-OMOP 데이터 수령 후 모델 고도화 가능"
+];
+
+const marketPosition = [
+  {
+    title: "해외 discharge AI와 다른 점",
+    body: "기관 연결·referral 자동화보다 국내 통합돌봄 담당자의 72시간 검토와 문서화에 집중합니다."
+  },
+  {
+    title: "기관 검색 서비스와 다른 점",
+    body: "단순 병원·요양기관 조회가 아니라 위험 신호, 후보 비교, 가족 안내, 인계 요약을 한 흐름으로 묶습니다."
+  },
+  {
+    title: "B2C 돌봄 플랫폼과 다른 점",
+    body: "가족에게 직접 기관을 추천하지 않고 공공 담당자와 병원 사회사업실의 판단 보조 화면으로 작동합니다."
+  }
 ];
 
 export default function ReadinessPage() {
@@ -118,6 +134,21 @@ export default function ReadinessPage() {
             <p className="mt-2 text-sm leading-6 text-slate-700">{item.body}</p>
           </article>
         ))}
+      </section>
+
+      <section className="mt-5 rounded-md border border-line bg-white p-5 shadow-soft">
+        <div className="mb-4 flex items-center gap-2">
+          <GitCompareArrows size={20} className="text-teal" />
+          <h2 className="text-xl font-black text-ink">시장 내 차별화 포지션</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {marketPosition.map((item) => (
+            <article key={item.title} className="rounded-md border border-line bg-panel p-4">
+              <h3 className="font-black text-ink">{item.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{item.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
