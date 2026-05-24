@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { Activity, ArrowRight, Camera, ClipboardCheck, ShieldCheck, UserRoundCheck, Wand2 } from "lucide-react";
+import { Activity, ArrowRight, Camera, ClipboardCheck, FileText, Languages, ShieldCheck, Timer, UserRoundCheck, Wand2 } from "lucide-react";
 import { AuditLogPanel } from "./AuditLogPanel";
 import { PatientInputForm } from "./PatientInputForm";
 import { RiskResultCard } from "./RiskResultCard";
@@ -68,16 +68,20 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="mb-2 text-sm font-bold text-teal">CareBridge72</p>
-            <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">퇴원 후 72시간 통합돌봄 검토</h1>
+            <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">퇴원 후 72시간 통합돌봄 워크스페이스</h1>
             <p className="mt-3 text-base leading-7 text-slate-700">
-              위험 신호, 지역 돌봄 자원 후보, 가족 안내문, 담당자 판단 기록을 한 화면에서 확인하는
-              실무자용 업무 화면입니다.
+              공공 담당자와 병원 사회사업실이 위험 신호, 지역 후보, 가족 안내 초안, 판단 기록을 한 흐름에서 처리하는 업무 제품입니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
               <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
               <StatusPill icon={<ClipboardCheck size={15} />} text="운영 원칙 확인" />
               <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 보조" />
               <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
+            </div>
+            <div className="mt-5 grid gap-2 sm:grid-cols-3">
+              <HeroValue icon={<Timer size={16} />} label="3분 검토" text="사례 입력부터 초안까지" />
+              <HeroValue icon={<FileText size={16} />} label="문서화 보조" text="인계·가족 안내 초안" />
+              <HeroValue icon={<Languages size={16} />} label="다국어 지원" text="ko/en/vi/zh 템플릿" />
             </div>
           </div>
 
@@ -195,6 +199,18 @@ function StatusPill({ icon, text }: { icon: ReactNode; text: string }) {
     <div className="flex min-h-8 items-center gap-2 rounded-md border border-line bg-panel px-3 py-1.5">
       <span className="text-teal">{icon}</span>
       <span className="whitespace-nowrap font-medium">{text}</span>
+    </div>
+  );
+}
+
+function HeroValue({ icon, label, text }: { icon: ReactNode; label: string; text: string }) {
+  return (
+    <div className="rounded-md border border-line bg-panel px-3 py-2">
+      <div className="flex items-center gap-2 text-sm font-black text-ink">
+        <span className="text-teal">{icon}</span>
+        {label}
+      </div>
+      <p className="mt-1 text-xs leading-5 text-slate-600">{text}</p>
     </div>
   );
 }
