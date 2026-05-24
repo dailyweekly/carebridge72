@@ -130,6 +130,9 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               AI 초안 생성
               <ChevronRight size={17} />
             </a>
+            <p className="-mt-2 rounded-md bg-white px-3 py-2 text-xs leading-5 text-slate-600">
+              접근 코드 확인 후 사용합니다. 사례 검토를 마친 뒤 인계 요약과 가족 안내 초안을 생성하세요.
+            </p>
             <a
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-panel px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-white"
               href="/capture"

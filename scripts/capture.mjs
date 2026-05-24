@@ -41,6 +41,12 @@ try {
   await workspacePage.screenshot({ path: path.join(captureDir, "07-hospital-reference.png"), fullPage: false });
   await workspacePage.close();
 
+  const mobilePage = await browser.newPage({ viewport: { width: 390, height: 1200 }, deviceScaleFactor: 1 });
+  await mobilePage.goto(baseUrl, { waitUntil: "networkidle" });
+  await hideDevChrome(mobilePage);
+  await mobilePage.screenshot({ path: path.join(captureDir, "08-mobile.png"), fullPage: false });
+  await mobilePage.close();
+
   const page = await browser.newPage({ viewport: { width: 1440, height: 1200 }, deviceScaleFactor: 1 });
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });

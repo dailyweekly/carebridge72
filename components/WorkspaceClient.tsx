@@ -334,6 +334,12 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               />
               <DraftCard title="가족 안내문 초안" draft={drafts.family} fallbackText={guide.text} />
             </div>
+            <DraftCompletionPanel
+              hasHandoff={Boolean(drafts.handoff)}
+              hasFamily={Boolean(drafts.family)}
+              candidateCount={resourceMatch.candidates.length}
+              resourceSourceLabel={resourceSourceLabel}
+            />
           </section>
         </section>
       </div>
@@ -563,6 +569,53 @@ function DraftButton({
       {pending ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
       {label}
     </button>
+  );
+}
+
+function DraftCompletionPanel({
+  hasHandoff,
+  hasFamily,
+  candidateCount,
+  resourceSourceLabel
+}: {
+  hasHandoff: boolean;
+  hasFamily: boolean;
+  candidateCount: number;
+  resourceSourceLabel: string;
+}) {
+  const checks = [
+    { label: "위험 신호 확인", done: true, detail: "점수와 근거 확인 완료" },
+    { label: "후보 정보 확인", done: candidateCount > 0, detail: `${candidateCount}건 · ${resourceSourceLabel}` },
+    { label: "인계 요약 생성", done: hasHandoff, detail: hasHandoff ? "담당자 전달 초안 생성됨" : "상단 버튼으로 생성" },
+    { label: "가족 안내 초안", done: hasFamily, detail: hasFamily ? "전달 전 검토 가능" : "필요 시 생성" }
+  ];
+  const doneCount = checks.filter((item) => item.done).length;
+
+  return (
+    <div className="mt-3 rounded-md border border-line bg-white p-3">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="font-bold text-ink">업무 마무리 상태</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-600">
+            담당자 확인 전 초안은 확정 문서가 아니며, 복사 후 기관 양식에 맞춰 정리합니다.
+          </p>
+        </div>
+        <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-black text-ink">
+          {doneCount}/4
+        </span>
+      </div>
+      <div className="grid gap-2 md:grid-cols-4">
+        {checks.map((item) => (
+          <div key={item.label} className="rounded-md border border-line bg-panel p-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className={item.done ? "text-teal" : "text-slate-300"} />
+              <p className="text-sm font-black text-ink">{item.label}</p>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-600">{item.detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

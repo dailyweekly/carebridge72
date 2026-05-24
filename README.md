@@ -35,7 +35,7 @@ npm run verify:submission
 npm run capture
 ```
 
-`captures/01-input.png`, `captures/02-risk.png`, `captures/03-candidates.png`, `captures/04-guide.png`, `captures/05-full.png`, `captures/06-workspace.png`, `captures/07-hospital-reference.png`가 생성됩니다.
+`captures/01-input.png`, `captures/02-risk.png`, `captures/03-candidates.png`, `captures/04-guide.png`, `captures/05-full.png`, `captures/06-workspace.png`, `captures/07-hospital-reference.png`, `captures/08-mobile.png`가 생성됩니다.
 
 ## 2. 기술 스택
 
