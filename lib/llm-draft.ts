@@ -24,10 +24,11 @@ export type DraftResponse = {
 };
 
 const fallbackModel = "deterministic-fallback";
+const defaultClaudeModel = "claude-3-5-haiku-20241022";
 
 export async function createLlmDraft(input: DraftRequest): Promise<DraftResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
-  const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+  const model = process.env.ANTHROPIC_MODEL || defaultClaudeModel;
 
   if (!apiKey) {
     return finalizeDraft(input, buildFallbackDraft(input), "fallback", fallbackModel);
@@ -43,7 +44,8 @@ export async function createLlmDraft(input: DraftRequest): Promise<DraftResponse
       },
       body: JSON.stringify({
         model,
-        max_tokens: 900,
+        max_tokens: 640,
+        temperature: 0.1,
         system: buildInstructions(input.kind),
         messages: [
           {
@@ -96,14 +98,35 @@ function buildInstructions(kind: DraftKind) {
     kind === "handoff"
       ? "시군 통합돌봄 또는 병원 사회사업실 담당자에게 전달할 인계 요약 초안을 작성한다."
       : "가족에게 전달하기 전 담당자가 검토할 쉬운 안내문 초안을 작성한다.";
+  const format =
+    kind === "handoff"
+      ? [
+          "출력 형식은 아래 5줄을 그대로 따른다.",
+          "사례 요약: ...",
+          "확인 사유: ...",
+          "우선 확인: ...",
+          "후보 검토: ...",
+          "담당자 판단: ..."
+        ]
+      : [
+          "출력 형식은 아래 4줄을 그대로 따른다.",
+          "안내 초안: ...",
+          "확인할 일: ...",
+          "연락 기준: ...",
+          "담당자 안내: ..."
+        ];
 
   return [
     purpose,
+    "입력 JSON에 없는 사실을 추정하거나 보태지 않는다. 값이 부족하면 '확인 필요'라고 쓴다.",
     "의료적 진단, 약물명, 용량, 치료 지시는 생성하지 않는다.",
+    kind === "family" ? "가족 안내문에는 진단군이나 질병명을 쓰지 않는다." : "담당자 인계 요약은 입력된 진단군만 간단히 언급할 수 있다.",
     "특정 의료기관이나 장기요양기관을 지정하거나 연결, 예약, 결제하도록 쓰지 않는다.",
     "후보 정보는 담당자 검토 대상이라고 표현한다.",
     "최종 판단과 전달은 담당자가 수행한다고 명확히 쓴다.",
-    "한국어로 5문장 이내, 실무자가 바로 붙여넣을 수 있는 문장으로 작성한다."
+    "마크다운 표, 굵은 글씨, 링크, 번호 목록을 쓰지 않는다.",
+    "한국어로 짧고 명확하게 작성한다.",
+    ...format
   ].join("\n");
 }
 
@@ -147,7 +170,7 @@ function finalizeDraft(
   source: DraftResponse["source"],
   model: string
 ): DraftResponse {
-  const safeText = assertSafeText(rawText.trim());
+  const safeText = assertSafeText(normalizeDraftText(rawText));
   const safety = validateLegalSafety({ text: safeText });
   const blocked = !safety.pass || safeText.includes("운영 원칙 확인 필요");
 
@@ -160,6 +183,14 @@ function finalizeDraft(
     blocked,
     generatedAt: new Date().toISOString()
   };
+}
+
+function normalizeDraftText(text: string) {
+  return text
+    .trim()
+    .replace(/\*\*/g, "")
+    .replace(/^\s*[-*]\s+/gm, "")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 function extractOutputText(payload: unknown) {
