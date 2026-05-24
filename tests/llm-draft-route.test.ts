@@ -53,6 +53,7 @@ describe("LLM draft route", () => {
 
     expect(response.status).toBe(200);
     expect(body.source).toBe("fallback");
+    expect(body.promptVersion).toBe("CB72-PROMPT-v2026.05.25");
     expect(body.safetyPass).toBe(true);
     expect(body.text).toContain("사례 P003");
   });

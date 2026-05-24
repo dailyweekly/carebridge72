@@ -602,7 +602,11 @@ function DraftCard({
         </div>
       </div>
       <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{text}</p>
-      {draft ? <p className="mt-3 text-xs text-slate-500">model: {draft.model}</p> : null}
+      {draft ? (
+        <p className="mt-3 text-xs text-slate-500">
+          model: {draft.model} · prompt: {draft.promptVersion}
+        </p>
+      ) : null}
     </article>
   );
 }
