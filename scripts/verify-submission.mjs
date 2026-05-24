@@ -8,6 +8,7 @@ const commands = [
   ["run", "test"],
   ["run", "lint"],
   ["run", "check:legal"],
+  ["run", "check:copy"],
   ["run", "build"],
   ["audit"],
   ["run", "capture"],

@@ -26,6 +26,7 @@ https://carebridge72.vercel.app/capture
 ```bash
 npm run test
 npm run check:legal
+npm run check:copy
 npm run build
 npm run verify:submission
 npm run check:captures
