@@ -70,8 +70,8 @@ export function PatientInputForm({
         <label className="block">
           <span className="text-xs font-semibold text-slate-600">사례 선택</span>
           <select
-            id="patient-preset"
-            name="patientPreset"
+            id="case-selection"
+            name="caseSelection"
             className={fieldClass}
             value={patient.id}
             onChange={(event) => {
