@@ -1,6 +1,7 @@
 "use client";
 
-import { Clipboard, Printer, ShieldCheck, ShieldX } from "lucide-react";
+import { CheckCircle2, Clipboard, Printer, ShieldCheck, ShieldX } from "lucide-react";
+import { useState } from "react";
 import { CaptureCaption } from "./CaptureCaption";
 import type { FamilyGuide } from "@/lib/types";
 import { languageLabels } from "@/lib/labels";
@@ -15,6 +16,14 @@ type FamilyGuidePanelProps = {
 export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreenNote = false }: FamilyGuidePanelProps) {
   const combined = `${koreanGuide.text}\n\n---\n\n${foreignGuide.text}`;
   const pass = koreanGuide.safety.pass && foreignGuide.safety.pass;
+  const [copied, setCopied] = useState(false);
+
+  async function copyGuide() {
+    await navigator.clipboard?.writeText(combined);
+    setCopied(true);
+    onCopy?.();
+    window.setTimeout(() => setCopied(false), 2200);
+  }
 
   return (
     <section id="guide" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
@@ -37,16 +46,19 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
         <button
           className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-teal bg-teal px-3 py-2 text-sm font-bold text-white"
           type="button"
-          onClick={() => {
-            navigator.clipboard?.writeText(combined);
-            onCopy?.();
-          }}
+          onClick={() => void copyGuide()}
           title="안내문 복사"
         >
-          <Clipboard size={16} />
-          복사
+          {copied ? <CheckCircle2 size={16} /> : <Clipboard size={16} />}
+          {copied ? "복사됨" : "복사"}
         </button>
       </div>
+
+      {copied ? (
+        <div className="mb-3 rounded-md border border-teal bg-teal-50 px-3 py-2 text-sm font-bold text-teal">
+          안내문이 복사되었습니다. 전달 전 담당자 확인 후 기관 양식에 붙여넣으세요.
+        </div>
+      ) : null}
 
       <div className="mb-4 rounded-md border border-line bg-panel p-3 text-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

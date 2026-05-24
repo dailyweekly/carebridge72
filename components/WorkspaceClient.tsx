@@ -734,6 +734,14 @@ function DraftCard({
 }) {
   const text = draft?.text ?? fallbackText ?? emptyText ?? "아직 생성된 초안이 없습니다.";
   const canCopy = Boolean(draft?.text || fallbackText);
+  const [copied, setCopied] = useState(false);
+
+  async function copyDraft() {
+    await navigator.clipboard?.writeText(text);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2200);
+  }
+
   return (
     <article className="rounded-md border border-line bg-panel p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -749,13 +757,18 @@ function DraftCard({
               className="inline-flex h-8 w-8 items-center justify-center rounded border border-line bg-white text-slate-600"
               type="button"
               aria-label={`${title} 복사`}
-              onClick={() => void navigator.clipboard?.writeText(text)}
+              onClick={() => void copyDraft()}
             >
-              <Copy size={15} />
+              {copied ? <CheckCircle2 size={15} /> : <Copy size={15} />}
             </button>
           ) : null}
         </div>
       </div>
+      {copied ? (
+        <p className="mb-2 rounded-md border border-teal bg-teal-50 px-2 py-1.5 text-xs font-bold text-teal">
+          복사되었습니다. 담당자 확인 후 기관 양식에 붙여넣으세요.
+        </p>
+      ) : null}
       <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{text}</p>
       {draft ? (
         <p className="mt-3 text-xs text-slate-500">
