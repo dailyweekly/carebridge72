@@ -354,7 +354,11 @@ export function WorkspaceClient({ initialPatients, resources, initialPatientId, 
                 draft={drafts.handoff}
                 emptyText="위험 신호와 후보 정보를 확인한 뒤 인계 요약 초안을 생성합니다."
               />
-              <DraftCard title="가족 안내문 초안" draft={drafts.family} fallbackText={guide.text} />
+              <DraftCard
+                title="가족 안내문 초안"
+                draft={drafts.family}
+                emptyText="가족 안내 초안 버튼을 누르면 선택 언어와 운영 원칙을 반영해 문구를 생성합니다."
+              />
             </div>
             <DraftCompletionPanel
               hasHandoff={Boolean(drafts.handoff)}
@@ -735,16 +739,14 @@ function DraftCompletionPanel({
 function DraftCard({
   title,
   draft,
-  fallbackText,
   emptyText
 }: {
   title: string;
   draft: DraftResponse | null;
-  fallbackText?: string;
   emptyText?: string;
 }) {
-  const text = draft?.text ?? fallbackText ?? emptyText ?? "아직 생성된 초안이 없습니다.";
-  const canCopy = Boolean(draft?.text || fallbackText);
+  const text = draft?.text ?? emptyText ?? "아직 생성된 초안이 없습니다.";
+  const canCopy = Boolean(draft?.text);
   const [copied, setCopied] = useState(false);
 
   async function copyDraft() {

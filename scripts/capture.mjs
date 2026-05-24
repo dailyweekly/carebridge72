@@ -37,6 +37,7 @@ try {
   await enterWorkspace(workspacePage, workspaceAccessCode);
   await hideDevChrome(workspacePage);
   await waitForWorkspaceData(workspacePage);
+  await generateWorkspaceDrafts(workspacePage);
   await workspacePage.screenshot({ path: path.join(captureDir, "06-workspace.png"), fullPage: false });
   await workspacePage.locator("text=병원 사회사업실 기준정보").scrollIntoViewIfNeeded();
   await workspacePage.screenshot({ path: path.join(captureDir, "07-hospital-reference.png"), fullPage: false });
@@ -181,4 +182,15 @@ async function waitForWorkspaceData(page) {
       .first()
       .waitFor({ state: "visible", timeout: 60000 })
   ]);
+}
+
+async function generateWorkspaceDrafts(page) {
+  await page.getByRole("button", { name: /인계 요약 생성/ }).first().click();
+  await page.waitForFunction(() => document.body.innerText.includes("담당자 전달 초안 생성됨"), null, {
+    timeout: 30000
+  });
+  await page.getByRole("button", { name: /가족 안내 초안/ }).first().click();
+  await page.waitForFunction(() => document.body.innerText.includes("전달 전 검토 가능"), null, {
+    timeout: 30000
+  });
 }
