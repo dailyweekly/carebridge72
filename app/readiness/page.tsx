@@ -1,0 +1,180 @@
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ClipboardCheck,
+  FileText,
+  LockKeyhole,
+  ShieldCheck,
+  Stethoscope,
+  Timer,
+  Workflow
+} from "lucide-react";
+import Link from "next/link";
+
+const pilotSteps = [
+  ["1", "업무 대상 확정", "퇴원 후 72시간 내 확인이 필요한 진단군과 담당 부서를 정합니다."],
+  ["2", "데이터 연결", "가명 사례와 공개 API를 먼저 연결하고, HIRA 맞춤형 데이터는 별도 절차로 반영합니다."],
+  ["3", "담당자 검수", "위험 신호, 후보 정보, 가족 안내문 초안이 실제 업무 흐름에 맞는지 확인합니다."],
+  ["4", "운영 전환", "접근 코드, 감사 로그, 운영 원칙 검사를 유지한 상태로 제한 배포합니다."]
+];
+
+const commercialFit = [
+  {
+    icon: <Building2 size={18} />,
+    title: "도입 대상",
+    body: "시군 통합돌봄 전담조직, 병원 사회사업실, 퇴원지원 협력기관"
+  },
+  {
+    icon: <Workflow size={18} />,
+    title: "도입 형태",
+    body: "4주 PoC, 기관 단위 SaaS, 지자체·병원 협력형 파일럿"
+  },
+  {
+    icon: <FileText size={18} />,
+    title: "제공 산출물",
+    body: "위험 신호, 지역 후보 정보, 가족 안내문 초안, 담당자 인계 요약"
+  },
+  {
+    icon: <ShieldCheck size={18} />,
+    title: "운영 원칙",
+    body: "기관 지정·예약·연결 없이 담당자 판단을 돕는 후보 정보만 제공"
+  }
+];
+
+const readinessItems = [
+  "Vercel 배포 완료 및 `/api/health` 운영 상태 확인 가능",
+  "Claude Haiku 기반 AI 초안 생성과 deterministic fallback 구조",
+  "NHIS 장기요양기관 검색 API와 HIRA 병원정보서비스 연동 준비",
+  "가명 데이터 기반 시연, 민감정보 입력 차단, 운영 원칙 검사",
+  "HIRA 맞춤형/K-OMOP 데이터 수령 후 모델 고도화 가능"
+];
+
+export default function ReadinessPage() {
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <section className="rounded-md border border-line bg-white p-5 shadow-soft">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-md bg-teal px-2.5 py-1 text-sm font-black text-white">
+                CareBridge72
+              </span>
+              <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-bold text-slate-700">
+                도입 검토
+              </span>
+            </div>
+            <h1 className="text-2xl font-black leading-tight text-ink sm:text-4xl">
+              퇴원지원 업무에 바로 붙일 수 있는 담당자 보조 SaaS
+            </h1>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-700">
+              케어브릿지72는 환자용 연결 서비스가 아니라, 공공 담당자와 병원 사회사업실이
+              퇴원 직후 돌봄 공백을 검토하고 문서화하는 업무 화면입니다.
+            </p>
+            <div className="mt-5 grid gap-2 md:grid-cols-3">
+              <ProofTile icon={<Timer size={16} />} label="PoC 시연" value="3분 내 핵심 흐름 확인" />
+              <ProofTile icon={<LockKeyhole size={16} />} label="AI 비용 통제" value="접근 코드 후 초안 생성" />
+              <ProofTile icon={<Stethoscope size={16} />} label="업무 경계" value="담당자 판단 보조" />
+            </div>
+          </div>
+
+          <div className="rounded-md border border-line bg-panel p-3">
+            <p className="text-xs font-black text-teal">Commercial readiness</p>
+            <p className="mt-1 text-lg font-black text-ink">도입 검토용 확인 경로</p>
+            <div className="mt-3 grid gap-2">
+              <Link
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-teal px-4 py-3 text-sm font-black text-white"
+                href="/"
+              >
+                사례 검토 화면
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-black text-slate-800"
+                href="/workspace"
+              >
+                AI 작업 화면
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-black text-slate-800"
+                href="/api/health"
+              >
+                운영 상태 API
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {commercialFit.map((item) => (
+          <article key={item.title} className="rounded-md border border-line bg-white p-4 shadow-soft">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md bg-teal text-white">
+              {item.icon}
+            </div>
+            <h2 className="text-lg font-black text-ink">{item.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-700">{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
+        <div className="rounded-md border border-line bg-white p-5 shadow-soft">
+          <div className="mb-4 flex items-center gap-2">
+            <ClipboardCheck size={20} className="text-teal" />
+            <h2 className="text-xl font-black text-ink">파일럿 도입 절차</h2>
+          </div>
+          <div className="grid gap-3">
+            {pilotSteps.map(([number, title, body]) => (
+              <article key={number} className="grid gap-3 rounded-md border border-line bg-panel p-3 sm:grid-cols-[40px_1fr]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal text-sm font-black text-white">
+                  {number}
+                </span>
+                <div>
+                  <h3 className="font-black text-ink">{title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">{body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-md border border-line bg-white p-5 shadow-soft">
+          <div className="mb-4 flex items-center gap-2">
+            <CheckCircle2 size={20} className="text-teal" />
+            <h2 className="text-xl font-black text-ink">현재 준비도</h2>
+          </div>
+          <ul className="grid gap-2">
+            {readinessItems.map((item) => (
+              <li key={item} className="flex gap-2 rounded-md border border-line bg-panel p-3 text-sm leading-6 text-slate-700">
+                <CheckCircle2 size={16} className="mt-1 shrink-0 text-teal" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 rounded-md border border-line bg-white p-3 text-sm leading-6 text-slate-700">
+            <p className="font-black text-ink">상용 전환 전제</p>
+            <p className="mt-1">
+              실환자 데이터 저장 없이 시작하고, 기관별 보안·개인정보 검토 후 HIRA 수령 데이터는
+              보안 분석 환경에서만 모델 고도화에 사용합니다.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function ProofTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-line bg-panel p-3">
+      <div className="flex items-center gap-2 text-sm font-black text-ink">
+        <span className="text-teal">{icon}</span>
+        {label}
+      </div>
+      <p className="mt-1 text-xs leading-5 text-slate-600">{value}</p>
+    </div>
+  );
+}

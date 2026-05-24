@@ -11,6 +11,7 @@ import {
   FileText,
   Languages,
   ListChecks,
+  PackageCheck,
   ShieldCheck,
   Timer,
   UserRoundCheck,
@@ -130,6 +131,13 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
             >
               <Camera size={17} />
               별첨 캡처 화면
+            </a>
+            <a
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-panel"
+              href="/readiness"
+            >
+              <PackageCheck size={17} />
+              도입 검토
             </a>
           </div>
         </div>

@@ -9,12 +9,13 @@ npm install
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 엽니다. 3000 포트가 사용 중이면 `npm run dev -- --port 3108`처럼 다른 포트를 지정합니다. 고정 시연 화면은 `/demo`, 실제 AI 문서화 작업 화면은 `/workspace`, 별첨 캡처 화면은 `/capture`입니다.
+브라우저에서 `http://localhost:3000`을 엽니다. 3000 포트가 사용 중이면 `npm run dev -- --port 3108`처럼 다른 포트를 지정합니다. 고정 시연 화면은 `/demo`, 실제 AI 문서화 작업 화면은 `/workspace`, 도입 검토 화면은 `/readiness`, 별첨 캡처 화면은 `/capture`입니다.
 
 Vercel 배포 URL:
 
 ```text
 https://carebridge72.vercel.app
+https://carebridge72.vercel.app/readiness
 https://carebridge72.vercel.app/workspace
 https://carebridge72.vercel.app/capture
 ```
