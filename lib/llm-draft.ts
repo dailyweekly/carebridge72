@@ -1,4 +1,4 @@
-import { categoryLabels, diagnosisLabels, regionLabels } from "./labels";
+import { bandLabels, categoryLabels, diagnosisLabels, regionLabels } from "./labels";
 import { assertSafeText, validateLegalSafety } from "./legal";
 import { detectPrivacyRisk } from "./privacy";
 import type { CareResource, FamilyGuide, Patient, RiskResult } from "./types";
@@ -26,39 +26,26 @@ export type DraftResponse = {
 };
 
 const fallbackModel = "deterministic-fallback";
-const defaultClaudeModel = "claude-3-5-haiku-20241022";
+export const defaultClaudeModel = "claude-haiku-4-5-20251001";
 export const llmPromptVersion = "CB72-PROMPT-v2026.05.25";
 const maxMemoLength = 360;
 
 export async function createLlmDraft(input: DraftRequest): Promise<DraftResponse> {
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
-  const model = process.env.ANTHROPIC_MODEL || defaultClaudeModel;
+  const requestedModel = process.env.ANTHROPIC_MODEL || defaultClaudeModel;
 
   if (!apiKey) {
     return finalizeDraft(input, buildFallbackDraft(input), "fallback", fallbackModel);
   }
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 640,
-        temperature: 0.1,
-        system: buildInstructions(input.kind),
-        messages: [
-          {
-            role: "user",
-            content: buildPrompt(input)
-          }
-        ]
-      })
-    });
+    let response = await requestClaude({ apiKey, model: requestedModel, input });
+    let model = requestedModel;
+
+    if ((response.status === 400 || response.status === 404) && requestedModel !== defaultClaudeModel) {
+      response = await requestClaude({ apiKey, model: defaultClaudeModel, input });
+      model = defaultClaudeModel;
+    }
 
     if (!response.ok) {
       return finalizeDraft(input, buildFallbackDraft(input), "fallback", `${fallbackModel}:http-${response.status}`);
@@ -90,12 +77,43 @@ export function buildFallbackDraft(input: DraftRequest) {
   }
 
   return [
-    `사례 ${input.patient.id}: ${regionLabels[input.patient.region]} ${diagnosisLabels[input.patient.primaryDiagnosisGroup]}, ${input.risk.band} ${input.risk.score}점.`,
+    `사례 ${input.patient.id}: ${regionLabels[input.patient.region]} ${diagnosisLabels[input.patient.primaryDiagnosisGroup]}, ${bandLabels[input.risk.band]} ${input.risk.score}점.`,
     `핵심 확인 사유: ${topReasons}.`,
     `우선 확인 항목: 퇴원 후 72시간 내 연락 가능성, 식사·이동 공백, 외래 방문 준비.`,
     `검토 후보: ${candidateLine || "지역 후보 정보 확인 필요"}.`,
     `담당자 메모: ${safeMemo}`
   ].join("\n");
+}
+
+function requestClaude({
+  apiKey,
+  model,
+  input
+}: {
+  apiKey: string;
+  model: string;
+  input: DraftRequest;
+}) {
+  return fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 640,
+      temperature: 0.1,
+      system: buildInstructions(input.kind),
+      messages: [
+        {
+          role: "user",
+          content: buildPrompt(input)
+        }
+      ]
+    })
+  });
 }
 
 function buildInstructions(kind: DraftKind) {

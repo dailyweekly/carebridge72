@@ -15,6 +15,8 @@ describe("LLM draft fallback", () => {
     const text = buildFallbackDraft({ kind: "handoff", patient, risk, candidates });
 
     expect(text).toContain("사례 P003");
+    expect(text).toContain("높음 78점");
+    expect(text).not.toContain("HIGH 78점");
     expect(text).not.toMatch(/병원\s*추천|의료기관\s*추천|환자\s*연결|기관\s*자동\s*배정/);
   });
 
