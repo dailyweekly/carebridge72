@@ -35,13 +35,13 @@ type WorkspaceClientProps = {
 type DraftState = Record<DraftKind, DraftResponse | null>;
 type ResourceStatus = "loading" | "live" | "fallback";
 type HospitalStatus = "loading" | "live" | "empty";
-const workspaceAccessCode = "7272";
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
   const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
   const [accessGranted, setAccessGranted] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [accessError, setAccessError] = useState("");
+  const [accessPending, setAccessPending] = useState(false);
   const [patient, setPatient] = useState<Patient>(initial);
   const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>("en");
   const [memo, setMemo] = useState("72시간 내 전화 확인 후 식사·이동 공백과 가족 연락 가능 여부를 확인합니다.");
@@ -170,10 +170,12 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               />
             </label>
             <button
-              className="mt-auto inline-flex min-h-11 items-center justify-center rounded-md bg-teal px-4 py-2 text-sm font-black text-white"
+              className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-teal px-4 py-2 text-sm font-black text-white disabled:opacity-60"
               type="submit"
+              disabled={accessPending}
             >
-              입장
+              {accessPending ? <Loader2 size={16} className="animate-spin" /> : null}
+              {accessPending ? "확인 중" : "입장"}
             </button>
           </form>
           {accessError ? <p className="mt-3 text-sm font-bold text-cranberry">{accessError}</p> : null}
@@ -367,13 +369,26 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
     }
   }
 
-  function submitAccessCode(event: React.FormEvent<HTMLFormElement>) {
+  async function submitAccessCode(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (accessCode.trim() !== workspaceAccessCode) {
-      setAccessError("접근 코드가 올바르지 않습니다.");
-      return;
+    setAccessPending(true);
+    setAccessError("");
+    try {
+      const response = await fetch("/api/workspace/access", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: accessCode })
+      });
+      if (!response.ok) {
+        setAccessError("접근 코드가 올바르지 않습니다.");
+        return;
+      }
+      setAccessGranted(true);
+    } catch {
+      setAccessError("접근 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setAccessPending(false);
     }
-    setAccessGranted(true);
   }
 }
 
