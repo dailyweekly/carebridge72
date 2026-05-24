@@ -29,7 +29,7 @@ const commercialFit = [
   {
     icon: <Workflow size={18} />,
     title: "도입 형태",
-    body: "4주 PoC, 기관 단위 SaaS, 지자체·병원 협력형 파일럿"
+    body: "4주 시범 운영, 기관 단위 사용, 지자체·병원 협력형 파일럿"
   },
   {
     icon: <FileText size={18} />,
@@ -45,8 +45,8 @@ const commercialFit = [
 
 const readinessItems = [
   "Vercel 배포 완료 및 `/api/health` 운영 상태 확인 가능",
-  "Claude Haiku 기반 AI 초안 생성과 deterministic fallback 구조",
-  "NHIS 장기요양기관 검색 API와 HIRA 병원정보서비스 연동 준비",
+  "Claude Haiku 기반 AI 초안 생성과 기본 초안 대체 구조",
+  "NHIS 장기요양기관 검색 서비스와 HIRA 병원정보서비스 연동 준비",
   "가명 데이터 기반 시연, 민감정보 입력 차단, 운영 원칙 검사",
   "HIRA 맞춤형/K-OMOP 데이터 수령 후 모델 고도화 가능"
 ];
@@ -54,7 +54,7 @@ const readinessItems = [
 const marketPosition = [
   {
     title: "해외 discharge AI와 다른 점",
-    body: "기관 연결·referral 자동화보다 국내 통합돌봄 담당자의 72시간 검토와 문서화에 집중합니다."
+    body: "기관 연결 자동화보다 국내 통합돌봄 담당자의 72시간 검토와 문서화에 집중합니다."
   },
   {
     title: "기관 검색 서비스와 다른 점",
@@ -81,21 +81,21 @@ export default function ReadinessPage() {
               </span>
             </div>
             <h1 className="text-2xl font-black leading-tight text-ink sm:text-4xl">
-              퇴원지원 업무에 바로 붙일 수 있는 담당자 보조 SaaS
+              퇴원지원 업무에 바로 붙일 수 있는 담당자 보조 화면
             </h1>
             <p className="mt-3 max-w-3xl text-base leading-7 text-slate-700">
               케어브릿지72는 환자용 연결 서비스가 아니라, 공공 담당자와 병원 사회사업실이
               퇴원 직후 돌봄 공백을 검토하고 문서화하는 업무 화면입니다.
             </p>
             <div className="mt-5 grid gap-2 md:grid-cols-3">
-              <ProofTile icon={<Timer size={16} />} label="PoC 시연" value="3분 내 핵심 흐름 확인" />
+              <ProofTile icon={<Timer size={16} />} label="시범 운영" value="3분 내 핵심 흐름 확인" />
               <ProofTile icon={<LockKeyhole size={16} />} label="AI 비용 통제" value="접근 코드 후 초안 생성" />
               <ProofTile icon={<Stethoscope size={16} />} label="업무 경계" value="담당자 판단 보조" />
             </div>
           </div>
 
           <div className="rounded-md border border-line bg-panel p-3">
-            <p className="text-xs font-black text-teal">Commercial readiness</p>
+            <p className="text-xs font-black text-teal">도입 준비도</p>
             <p className="mt-1 text-lg font-black text-ink">도입 검토용 확인 경로</p>
             <div className="mt-3 grid gap-2">
               <Link
@@ -116,7 +116,7 @@ export default function ReadinessPage() {
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-black text-slate-800"
                 href="/api/health"
               >
-                운영 상태 API
+                운영 상태 확인
                 <ArrowRight size={16} />
               </Link>
             </div>

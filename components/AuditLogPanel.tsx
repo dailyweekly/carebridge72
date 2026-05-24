@@ -10,7 +10,7 @@ export function AuditLogPanel({ logs }: AuditLogPanelProps) {
     <section className="mt-6 rounded-md border border-line bg-white p-4 shadow-soft">
       <div className="mb-4 flex items-center gap-2">
         <History size={20} className="text-teal" />
-        <h2 className="text-lg font-bold text-ink">감사 로그</h2>
+        <h2 className="text-lg font-bold text-ink">처리 이력</h2>
       </div>
       <div className="grid gap-2">
         {logs.map((log) => (

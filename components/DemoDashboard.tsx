@@ -79,7 +79,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <p className="rounded-md bg-teal px-2.5 py-1 text-sm font-black text-white">CareBridge72</p>
               <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-bold text-slate-700">
-                담당자용 퇴원 사례 검토 SaaS
+                담당자용 퇴원 사례 검토 화면
               </span>
             </div>
             <h1 className="text-2xl font-black leading-tight tracking-normal text-ink sm:text-4xl">
@@ -89,7 +89,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               위험 신호, 지역 돌봄 후보, 가족 안내문, 판단 기록을 담당자 업무 순서대로 묶어 72시간 내 초기 확인을 빠르게 돕습니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
-              <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
+              <StatusPill icon={<Activity size={15} />} text="시연용 사례" />
               <StatusPill icon={<ClipboardCheck size={15} />} text="운영 원칙 확인" />
               <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 보조" />
               <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
@@ -100,7 +100,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               <HeroValue icon={<Languages size={16} />} label="다국어 지원" text="ko/en/vi/zh 템플릿" />
             </div>
             <div className="mt-4 grid gap-2 rounded-md border border-line bg-panel p-3 text-sm text-slate-700 sm:grid-cols-3">
-              <HeroMetric label="현재 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} />
+              <HeroMetric label="현재 사례" value={`${patient.id} · ${risk.score}점`} />
               <HeroMetric label="후보 정보" value={`${resourceMatch.candidates.length}건 비교`} />
               <HeroMetric label="다음 행동" value={risk.band === "HIGH" ? "72시간 내 확인" : "일반 확인"} />
             </div>
@@ -266,7 +266,7 @@ function CommercialFitStrip() {
     {
       icon: <ClipboardCheck size={17} />,
       label: "입력",
-      value: "가명 사례 · 생활환경 · 거주지역"
+      value: "사례 정보 · 생활환경 · 거주지역"
     },
     {
       icon: <FileText size={17} />,

@@ -60,7 +60,7 @@ export function PatientInputForm({
       ) : null}
       <div className="mb-4 flex items-center gap-2">
         <UserRoundCheck className="text-teal" size={20} />
-        <h2 className="text-lg font-bold text-ink">가명 환자 입력</h2>
+        <h2 className="text-lg font-bold text-ink">사례 정보 입력</h2>
       </div>
       <div className="mb-4 rounded-md border border-line bg-panel p-3 text-sm leading-6 text-slate-700">
         입력값을 바꾸면 위험 신호, 후보 정보, 가족 안내문이 자동 갱신됩니다.
@@ -68,7 +68,7 @@ export function PatientInputForm({
 
       <div className="space-y-4">
         <label className="block">
-          <span className="text-xs font-semibold text-slate-600">Preset</span>
+          <span className="text-xs font-semibold text-slate-600">사례 선택</span>
           <select
             id="patient-preset"
             name="patientPreset"

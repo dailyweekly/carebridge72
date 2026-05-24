@@ -48,9 +48,9 @@ export const languageLabels: Record<Language, string> = {
 };
 
 export const bandLabels: Record<RiskBand, string> = {
-  LOW: "Low",
-  MEDIUM: "Medium",
-  HIGH: "High"
+  LOW: "낮음",
+  MEDIUM: "중간",
+  HIGH: "높음"
 };
 
 export const livingArrangementLabels: Record<LivingArrangement, string> = {

@@ -146,10 +146,10 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               <LockKeyhole size={22} />
             </span>
             <div>
-              <p className="text-sm font-bold text-teal">CareBridge72 Workspace</p>
-              <h1 className="mt-1 text-2xl font-black text-ink">AI 작업 화면 접근 코드</h1>
+              <p className="text-sm font-bold text-teal">CareBridge72 작업 화면</p>
+              <h1 className="mt-1 text-2xl font-black text-ink">AI 초안 생성 접근 코드</h1>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Claude API 토큰이 사용될 수 있는 화면입니다. 접근 코드를 입력하면 담당자 인계와 가족 안내 초안 화면으로 이동합니다.
+                초안 생성 비용이 발생할 수 있어 접근 코드를 확인합니다. 입력 후 담당자 인계와 가족 안내 초안을 작성할 수 있습니다.
               </p>
             </div>
           </div>
@@ -180,7 +180,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           </form>
           {accessError ? <p className="mt-3 text-sm font-bold text-cranberry">{accessError}</p> : null}
           <p className="mt-4 text-xs leading-5 text-slate-500">
-            데모 화면은 공개되어 있으며, 실제 초안 생성은 접근 코드 확인 후 사용할 수 있습니다.
+            사례 검토 화면은 공개되어 있으며, AI 초안 생성은 접근 코드 확인 후 사용할 수 있습니다.
           </p>
         </section>
       </main>
@@ -192,10 +192,10 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
       <section className="mb-5 rounded-md border border-line bg-white p-5 shadow-soft">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="mb-2 text-sm font-bold text-teal">CareBridge72 Workspace</p>
+            <p className="mb-2 text-sm font-bold text-teal">CareBridge72 작업 화면</p>
             <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">담당자 인계와 가족 안내 초안</h1>
             <p className="mt-3 text-base leading-7 text-slate-700">
-              선택된 사례의 위험 신호와 지역 후보를 확인한 뒤, Claude가 담당자용 문서 초안을 작성합니다.
+              선택된 사례의 위험 신호와 지역 후보를 확인한 뒤, 담당자가 검토할 문서 초안을 작성합니다.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:w-[380px]">
@@ -228,7 +228,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
         </div>
 
         <div className="mt-5 grid gap-3 md:grid-cols-5">
-          <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
+          <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
           <SummaryTile label="검토 시간" value={`${signal.windowStatus} · ${signal.elapsedHours}h`} />
           <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} hint={resourceSourceLabel} />
           <SummaryTile label="병원 기준정보" value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`} hint={hospitalStatus === "live" ? "공공데이터 반영" : "기준정보 없음"} />
@@ -268,10 +268,10 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               <div>
                 <div className="flex items-center gap-2">
                   <Bot className="text-teal" size={20} />
-                  <h2 className="text-lg font-bold text-ink">LLM 적용 범위</h2>
+                  <h2 className="text-lg font-bold text-ink">AI 사용 범위</h2>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  LLM은 점수 산정, 기관 지정, 의료 판단을 하지 않습니다. 담당자 확인 후 사용할 문서 초안만 생성합니다.
+                  AI는 점수 산정, 기관 지정, 의료 판단을 하지 않습니다. 담당자 확인 후 사용할 문서 초안만 생성합니다.
                 </p>
               </div>
               <span className="rounded-md border border-line bg-panel px-3 py-1 text-xs font-bold text-slate-700">
@@ -280,7 +280,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               <ScopeCard icon={<ClipboardCheck size={17} />} title="위험 판단" text="기존 규칙·모델 결과만 사용" />
-              <ScopeCard icon={<FileText size={17} />} title="인계 요약" text="LLM 초안 생성 가능" />
+              <ScopeCard icon={<FileText size={17} />} title="인계 요약" text="AI 초안 생성 가능" />
               <ScopeCard icon={<Languages size={17} />} title="가족 안내" text="운영 원칙 확인 후 표시" />
             </div>
           </section>
@@ -432,7 +432,7 @@ function HospitalReferencePanel({ status, references }: { status: HospitalStatus
         <div className="rounded-md border border-dashed border-line bg-panel p-4 text-sm leading-6 text-slate-600">
           {status === "loading"
             ? "외부 병원정보서비스 응답을 기다리고 있습니다."
-            : "외부 API 지연 또는 지역 결과 없음으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다."}
+            : "공공데이터 응답 지연 또는 지역 결과 없음으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다."}
         </div>
       )}
     </section>
@@ -450,17 +450,17 @@ function ResourceSourceNotice({ status, source }: { status: ResourceStatus; sour
           </span>
           <div>
             <p className="text-sm font-black text-ink">
-              {isLive ? "공공데이터 실시간 후보 반영" : status === "loading" ? "공공데이터 후보 조회 중" : "예비 후보 데이터로 표시"}
+              {isLive ? "공공데이터 후보 반영" : status === "loading" ? "공공데이터 후보 조회 중" : "기본 후보 정보로 표시"}
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-600">
               {isLive
                 ? "공공데이터 결과를 우선 반영하고, 부족한 항목은 예비 후보로 보강합니다."
-                : "외부 API 지연 또는 미응답 시 화면 흐름을 유지하기 위해 예비 후보를 표시합니다."}
+                : "공공데이터 응답이 늦거나 없을 때도 화면 흐름을 유지하기 위해 기본 후보 정보를 표시합니다."}
             </p>
           </div>
         </div>
         <span className="rounded-md border border-line bg-panel px-2 py-1 text-xs font-bold text-slate-700">
-          {isLive ? "공공데이터 반영" : status === "loading" ? "조회 중" : "예비 데이터"}
+          {isLive ? "공공데이터 반영" : status === "loading" ? "조회 중" : "기본 정보"}
         </span>
       </div>
     </div>
@@ -586,7 +586,7 @@ function DraftCard({
         <div className="flex items-center gap-2">
           {draft ? (
             <span className="rounded bg-white px-2 py-1 text-xs font-bold text-slate-700">
-              {draft.source === "claude" ? "Claude 생성" : "예비 초안"} · {draft.safetyPass ? "통과" : "검토 필요"}
+              {draft.source === "claude" ? "AI 생성" : "기본 초안"} · {draft.safetyPass ? "통과" : "검토 필요"}
             </span>
           ) : null}
           {canCopy ? (
@@ -604,7 +604,7 @@ function DraftCard({
       <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{text}</p>
       {draft ? (
         <p className="mt-3 text-xs text-slate-500">
-          model: {draft.model} · prompt: {draft.promptVersion}
+          운영 정보: {draft.source === "claude" ? "AI 생성" : "기본 생성"} · 문구 기준 {draft.promptVersion}
         </p>
       ) : null}
     </article>
