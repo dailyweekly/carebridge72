@@ -3,7 +3,7 @@
 import { CheckCircle2, ClipboardCheck, FileText, Send } from "lucide-react";
 import { useMemo, useState } from "react";
 import { assessCaseReview } from "@/lib/case-review";
-import { categoryLabels, regionLabels } from "@/lib/labels";
+import { bandLabels, categoryLabels, regionLabels } from "@/lib/labels";
 import type { CandidateReviewStatus, CareResource, Patient, RiskResult } from "@/lib/types";
 
 type DecisionStatus = "추가 확인 필요" | "시군 검토 유지" | "병원-시군 인계" | "가족 안내 준비";
@@ -44,8 +44,8 @@ export function CaseDecisionPanel({
   ];
   const completionCount = checks.filter((item) => item.done).length;
   const handoffSummary = [
-    `${patient.id} · ${regionLabels[patient.region]} · ${risk.band} ${risk.score}점`,
-    `검토 상태: ${signal.windowStatus}, 퇴원 후 ${signal.elapsedHours}시간`,
+    `${patient.id} · ${regionLabels[patient.region]} · ${bandLabels[risk.band]} ${risk.score}점`,
+    `검토 상태: ${signal.windowStatus}, 퇴원 후 ${signal.elapsedHours}시간(${signal.referenceLabel})`,
     `핵심 사유: ${signal.reasons.slice(0, 3).join(", ")}`,
     `후보군: ${activeCandidates.slice(0, 2).map((item) => `${categoryLabels[item.category]} ${item.distanceKm.toFixed(1)}km`).join(" / ")}`,
     `판단: ${decisionStatus} · ${note.trim()}`

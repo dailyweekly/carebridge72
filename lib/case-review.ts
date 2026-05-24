@@ -1,7 +1,9 @@
+import { bandLabels } from "./labels";
 import type { Patient, ReviewCase, RiskBand, RiskResult } from "./types";
 
-const REVIEW_WINDOW_HOURS = 72;
-const REFERENCE_NOW = Date.UTC(2026, 4, 23, 9, 0, 0);
+export const REVIEW_WINDOW_HOURS = 72;
+export const DEMO_REVIEW_REFERENCE_AT = "2026-05-23T09:00:00.000Z";
+const REFERENCE_NOW = Date.parse(DEMO_REVIEW_REFERENCE_AT);
 
 export type ReviewWindowStatus = "검토 필요" | "일반 확인" | "72시간 초과" | "퇴원 전";
 
@@ -11,6 +13,8 @@ export type CaseReviewSignal = {
   windowStatus: ReviewWindowStatus;
   priorityScore: number;
   reasons: string[];
+  referenceAt: string;
+  referenceLabel: string;
 };
 
 export function assessCaseReview(
@@ -31,7 +35,9 @@ export function assessCaseReview(
     remainingHours,
     windowStatus,
     priorityScore,
-    reasons
+    reasons,
+    referenceAt: DEMO_REVIEW_REFERENCE_AT,
+    referenceLabel: formatReferenceLabel(DEMO_REVIEW_REFERENCE_AT)
   };
 }
 
@@ -77,12 +83,21 @@ function buildReviewReasons(
 ) {
   const reasons: string[] = [];
   if (withinWindow) reasons.push(urgentWindow ? "72시간 임박" : "72시간 내 확인");
-  if (band === "HIGH") reasons.push("HIGH 위험 신호");
-  if (band === "MEDIUM") reasons.push("중간 위험 신호");
+  if (band === "HIGH") reasons.push(`${bandLabels[band]} 위험 신호`);
+  if (band === "MEDIUM") reasons.push(`${bandLabels[band]} 위험 신호`);
   if (!patient.caregiverPresent) reasons.push("상주 돌봄자 없음");
   if (patient.livingArrangement === "ALONE") reasons.push("단독 거주");
   if (patient.preferredLanguage !== "ko") reasons.push("다국어 안내 필요");
   return reasons.length > 0 ? reasons : ["일반 퇴원 확인"];
+}
+
+function formatReferenceLabel(value: string) {
+  const date = new Date(value);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hour = String(date.getUTCHours()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hour}:00 기준`;
 }
 
 function getPriorityScore(

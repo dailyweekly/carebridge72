@@ -36,9 +36,10 @@ describe("case review assessment", () => {
     expect(signal.windowStatus).toBe("검토 필요");
     expect(signal.elapsedHours).toBe(33);
     expect(signal.remainingHours).toBe(39);
-    expect(signal.reasons).toContain("HIGH 위험 신호");
+    expect(signal.reasons).toContain("높음 위험 신호");
     expect(signal.reasons).toContain("상주 돌봄자 없음");
     expect(signal.reasons).toContain("단독 거주");
+    expect(signal.referenceLabel).toBe("2026-05-23 09:00 기준");
   });
 
   it("marks cases outside the first 72 hours as expired", () => {

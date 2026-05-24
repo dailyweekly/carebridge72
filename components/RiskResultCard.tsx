@@ -45,6 +45,7 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
             <p className="mt-1 text-xs text-slate-600">
               퇴원 후 {reviewSignal.elapsedHours}h · {formatRemainingHours(reviewSignal.remainingHours)}
             </p>
+            <p className="mt-1 text-xs text-slate-500">시연 {reviewSignal.referenceLabel}</p>
           </div>
           <div className={`flex min-w-48 items-center justify-between rounded-md border px-4 py-3 ${tone}`}>
             <div>
@@ -80,6 +81,10 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
           <div className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
             <Info size={16} className="text-teal" />
             해석 가능 규칙 가중치
+          </div>
+          <div className="mb-3 rounded-md border border-line bg-panel p-2 text-xs leading-5 text-slate-600">
+            기본점수 18점에 나이, 진단군, 동반질환, 돌봄자·생활환경, 비고 키워드 가중치를 더하고 0~100점으로 제한합니다.
+            점수는 담당자 우선순위 신호이며 의료 판단이나 기관 배정 기준이 아닙니다.
           </div>
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {risk.factors.map((factor) => (

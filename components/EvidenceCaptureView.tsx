@@ -1,6 +1,7 @@
 import { CalendarDays } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
 import { bandLabels, categoryLabels, comorbidityLabels, diagnosisLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
+import { assessCaseReview } from "@/lib/case-review";
 import { submissionEvidence } from "@/lib/submission-evidence";
 import type { CareResource, FamilyGuide, Patient, RiskResult } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export function EvidenceCaptureView({
   compact
 }: EvidenceCaptureViewProps) {
   const safetyPass = koreanGuide.safety.pass && foreignGuide.safety.pass;
+  const signal = assessCaseReview(patient, risk);
 
   return (
     <section
@@ -30,7 +32,7 @@ export function EvidenceCaptureView({
     >
       <CaptureCaption
         title="별첨5 캡처 화면"
-        description={`작성일: ${submissionEvidence.preparedAt} / 가명 데이터(P003) / 모델 버전: ${risk.modelVersion} / 운영 원칙 확인: 통과 / 본 화면은 ${submissionEvidence.purpose}용입니다.`}
+        description={`작성일: ${submissionEvidence.preparedAt} / 시연 기준: ${signal.referenceLabel} / 가명 데이터(P003) / 모델 버전: ${risk.modelVersion} / 운영 원칙 확인: 통과 / 본 화면은 ${submissionEvidence.purpose}용입니다.`}
       />
       <div className="mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -70,7 +72,7 @@ export function EvidenceCaptureView({
               <div>
                 <p className="text-xs font-bold text-teal">화면 02 · 위험 검토</p>
                 <h3 className="mt-1 text-lg font-black text-ink">재입원 위험 신호 {bandLabels[risk.band]} {risk.score}점</h3>
-                <p className="mt-1 text-sm text-slate-600">모델 버전 {risk.modelVersion} · 설명 신뢰도 {Math.round(risk.confidence * 100)}%</p>
+                <p className="mt-1 text-sm text-slate-600">모델 버전 {risk.modelVersion} · 설명 신뢰도 {Math.round(risk.confidence * 100)}% · {signal.referenceLabel}</p>
               </div>
               <div className="rounded-md border border-cranberry bg-rose-50 px-4 py-2 text-right text-cranberry">
                 <p className="text-xs font-bold">{bandLabels[risk.band]}</p>
@@ -100,6 +102,7 @@ export function EvidenceCaptureView({
               {candidates.slice(0, 5).map((candidate) => (
                 <article key={candidate.id} className="rounded-md border border-line bg-panel p-2 text-xs">
                   <p className="font-bold text-teal">{categoryLabels[candidate.category]}</p>
+                  <p className="text-[11px] font-bold text-slate-500">{candidate.id.startsWith("NHIS-LTC") ? "NHIS API" : "예비 후보"}</p>
                   <p className="font-semibold text-ink">{candidate.name}</p>
                   <p className="text-slate-600">{candidate.distanceKm.toFixed(1)}km · {candidate.operatingWindow}</p>
                 </article>

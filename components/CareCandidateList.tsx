@@ -64,9 +64,12 @@ export function CareCandidateList({
           <article key={candidate.id} className={`rounded-md border p-3 shadow-sm transition hover:shadow-soft ${statusTone}`}>
             <div className="mb-2 flex items-start justify-between gap-2">
               <div>
-                <p className="inline-flex rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal">
-                  {categoryLabels[candidate.category]}
-                </p>
+                <div className="flex flex-wrap gap-1">
+                  <p className="inline-flex rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal">
+                    {categoryLabels[candidate.category]}
+                  </p>
+                  <SourceBadge candidate={candidate} />
+                </div>
                 <h3 className="mt-1 text-base font-bold text-ink">{candidate.name}</h3>
               </div>
               <span className="rounded-md border border-line bg-white px-2 py-1 text-xs font-bold text-slate-600">
@@ -85,6 +88,10 @@ export function CareCandidateList({
               <div className="flex justify-between gap-3">
                 <dt className="font-semibold">운영</dt>
                 <dd className="text-right">{candidate.operatingWindow}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="font-semibold">출처</dt>
+                <dd className="text-right">{getCandidateSource(candidate).label}</dd>
               </div>
             </dl>
             <p className="mt-3 rounded-md bg-panel p-2 text-sm leading-5 text-slate-700">{candidate.notes}</p>
@@ -123,6 +130,30 @@ export function CareCandidateList({
       </div>
     </section>
   );
+}
+
+function SourceBadge({ candidate }: { candidate: CareResource }) {
+  const source = getCandidateSource(candidate);
+  return (
+    <span className={`inline-flex rounded-md px-2 py-1 text-xs font-bold ${source.className}`}>
+      {source.badge}
+    </span>
+  );
+}
+
+function getCandidateSource(candidate: CareResource) {
+  if (candidate.id.startsWith("NHIS-LTC")) {
+    return {
+      badge: "공공 API",
+      label: "NHIS 장기요양기관",
+      className: "bg-blue-50 text-blue-700"
+    };
+  }
+  return {
+    badge: "예비 후보",
+    label: "시연용 기본 후보",
+    className: "bg-slate-100 text-slate-700"
+  };
 }
 
 function ReviewCriterion({ label, text }: { label: string; text: string }) {
