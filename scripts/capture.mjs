@@ -45,7 +45,7 @@ try {
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await hideDevChrome(page);
-  await page.selectOption("select[name='patientPreset']", "P003");
+  await page.selectOption("select[name='caseSelection']", "P003");
   await page.screenshot({ path: path.join(captureDir, "01-input.png"), fullPage: false });
 
   await page.goto(`${baseUrl}/capture`, { waitUntil: "networkidle" });
