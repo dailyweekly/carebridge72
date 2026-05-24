@@ -90,4 +90,21 @@ describe("HIRA hospital info integration", () => {
     expect(networkFailed.source).toBe("request-failed");
     expect(networkFailed.statusCode).toBe(504);
   });
+
+  it("sends HIRA service key with documented parameter casing", async () => {
+    let requestedUrl = "";
+    await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      {
+        env: { DATA_GO_KR_SERVICE_KEY: "key" },
+        fetcher: ((url) => {
+          requestedUrl = url.toString();
+          return Promise.resolve(new Response("<response><body><items /></body></response>"));
+        }) as typeof fetch
+      }
+    );
+
+    expect(requestedUrl).toContain("ServiceKey=key");
+    expect(requestedUrl).not.toContain("serviceKey=key");
+  });
 });

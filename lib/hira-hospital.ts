@@ -4,7 +4,7 @@ import type { Patient } from "./types";
 
 type FetchLike = typeof fetch;
 const cacheTtlMs = 30 * 60 * 1000;
-const requestTimeoutMs = 5000;
+const requestTimeoutMs = 12000;
 export type HiraHospitalSource =
   | "hira-live"
   | "hira-live-empty"
@@ -56,7 +56,12 @@ export async function fetchHiraHospitalLookup(
   url.searchParams.set("sidoCd", "310000");
 
   try {
-    const result = await fetchXml(url, fetcher);
+    let result = await fetchXml(url, fetcher);
+    if (!fetcher && result.statusCode === 0 && url.protocol === "https:") {
+      const httpUrl = new URL(url.toString());
+      httpUrl.protocol = "http:";
+      result = await fetchXml(httpUrl, fetcher);
+    }
     if (!result.ok) {
       return {
         source: result.statusCode === 401 || result.statusCode === 403 ? "authorization-failed" : "request-failed",
