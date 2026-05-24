@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const captureDir = path.join(root, "captures");
+const nextEnvPath = path.join(root, "next-env.d.ts");
 const host = "localhost";
 const port = 3101;
 const spawnedBaseUrl = `http://${host}:${port}`;
@@ -14,6 +15,7 @@ const workspaceAccessCode = process.env.WORKSPACE_ACCESS_CODE || "7272";
 const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 
 await fs.mkdir(captureDir, { recursive: true });
+const originalNextEnv = await readOptionalFile(nextEnvPath);
 
 const detectedBaseUrl = await findReusableBaseUrl(reusableBaseUrl);
 const shouldReuseServer = Boolean(detectedBaseUrl);
@@ -58,6 +60,7 @@ try {
   console.log("Capture files written to captures/.");
 } finally {
   server?.kill();
+  await restoreFileIfChanged(nextEnvPath, originalNextEnv);
 }
 
 async function isServerReady(url, timeoutMs) {
@@ -66,6 +69,23 @@ async function isServerReady(url, timeoutMs) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function readOptionalFile(filePath) {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+async function restoreFileIfChanged(filePath, originalContent) {
+  if (originalContent === null) return;
+  const currentContent = await readOptionalFile(filePath);
+  if (currentContent !== originalContent) {
+    await fs.writeFile(filePath, originalContent);
   }
 }
 
