@@ -144,7 +144,7 @@ function SourceBadge({ candidate }: { candidate: CareResource }) {
 function getCandidateSource(candidate: CareResource) {
   if (candidate.id.startsWith("NHIS-LTC")) {
     return {
-      badge: "공공 API",
+      badge: "공공데이터",
       label: "NHIS 장기요양기관",
       className: "bg-blue-50 text-blue-700"
     };

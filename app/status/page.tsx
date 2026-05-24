@@ -36,7 +36,7 @@ export default function StatusPage() {
               배포·연동·운영 통제를 한 화면에서 확인합니다
             </h1>
             <p className="mt-3 max-w-3xl text-base leading-7 text-slate-700">
-              이 화면은 담당자 업무 화면과 분리된 운영 확인용입니다. 비밀 키 값은 표시하지 않고 연결 상태와 통제 방식만 보여줍니다.
+              이 화면은 담당자 업무 화면과 분리된 운영 확인용입니다. 비밀 설정값은 표시하지 않고 연결 상태와 통제 방식만 보여줍니다.
             </p>
           </div>
           <div className={`rounded-md border p-4 ${isOk ? "border-teal bg-teal-50" : "border-amber-300 bg-amber-50"}`}>
@@ -93,7 +93,7 @@ export default function StatusPage() {
             <ControlRow label="AI 접근" value={controlLabel(health.operationalControls.workspaceAccess)} />
             <ControlRow label="AI 비용 통제" value="작업 화면 접근 후 실행" />
             <ControlRow label="AI 실패 대응" value="기본 초안으로 전환" />
-            <ControlRow label="공공 API 실패 대응" value="예비 후보로 전환" />
+            <ControlRow label="공공데이터 지연 대응" value="예비 후보로 전환" />
             <ControlRow label="민감정보 입력" value="패턴 차단" />
             <ControlRow label="환자 식별자" value="수집하지 않음" />
           </div>
@@ -108,7 +108,7 @@ export default function StatusPage() {
             <StatusLink href="/" label="사례 검토 화면" />
             <StatusLink href="/workspace" label="AI 작업 화면" />
             <StatusLink href="/readiness" label="도입 검토 화면" />
-            <StatusLink href="/api/health" label="JSON 운영 상태 API" icon={<FileJson size={16} />} />
+            <StatusLink href="/api/health" label="운영 상태 원문" icon={<FileJson size={16} />} />
           </div>
         </div>
       </section>
@@ -162,16 +162,16 @@ function StatusLink({ href, label, icon }: { href: string; label: string; icon?:
 }
 
 function modeLabel(value: string) {
-  if (value === "claude-enabled") return "Claude 연결";
-  if (value === "enabled-with-fallback") return "API 연결";
-  if (value === "fallback-only") return "기본 모드";
+  if (value === "claude-enabled") return "문서 생성 연결";
+  if (value === "enabled-with-fallback") return "공공데이터 연결";
+  if (value === "fallback-only") return "기본 정보 사용";
   if (value === "procedural-request") return "별도 절차";
   return value;
 }
 
 function controlLabel(value: string) {
-  if (value === "enabled") return "환경변수 코드 사용";
-  if (value === "default-code") return "기본 코드 사용";
+  if (value === "enabled") return "접근 코드 설정됨";
+  if (value === "default-code") return "접근 코드 사용";
   return value;
 }
 

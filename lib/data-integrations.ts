@@ -20,11 +20,11 @@ export type IntegrationStatus = DataIntegration & {
 export const dataIntegrations: DataIntegration[] = [
   {
     id: "ANTHROPIC_CLAUDE",
-    name: "Claude Messages API",
+    name: "Claude 문서 생성 연동",
     provider: "Anthropic",
     purpose: "담당자 인계 요약과 가족 안내문 초안 생성",
     envKeys: ["ANTHROPIC_API_KEY", "ANTHROPIC_MODEL", "WORKSPACE_ACCESS_CODE"],
-    obtainFrom: "Anthropic Console에서 API 키 발급 후 Vercel 환경변수 등록",
+    obtainFrom: "Anthropic Console에서 발급 후 Vercel 운영 설정에 등록",
     url: "https://platform.claude.com/docs/en/build-with-claude/working-with-messages",
     priority: "P1"
   },
@@ -50,17 +50,17 @@ export const dataIntegrations: DataIntegration[] = [
   },
   {
     id: "KOSIS",
-    name: "KOSIS OpenAPI",
+    name: "KOSIS 통계 연동",
     provider: "통계청",
     purpose: "시군구 고령화와 지역 수요 지표 보강",
     envKeys: ["KOSIS_API_KEY"],
-    obtainFrom: "KOSIS 공유서비스 → OPEN API 인증키 신청",
+    obtainFrom: "KOSIS 공유서비스에서 인증 신청",
     url: "https://kosis.kr/openapi/index/",
     priority: "P2"
   },
   {
     id: "GEOCODING",
-    name: "주소·좌표 변환 API",
+    name: "주소·좌표 변환 연동",
     provider: "도로명주소 개발자센터 또는 SGIS/VWorld",
     purpose: "기관 주소 좌표화와 거리 계산 고도화",
     envKeys: ["GEOCODING_API_KEY"],

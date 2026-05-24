@@ -102,7 +102,7 @@ export function EvidenceCaptureView({
               {candidates.slice(0, 5).map((candidate) => (
                 <article key={candidate.id} className="rounded-md border border-line bg-panel p-2 text-xs">
                   <p className="font-bold text-teal">{categoryLabels[candidate.category]}</p>
-                  <p className="text-[11px] font-bold text-slate-500">{candidate.id.startsWith("NHIS-LTC") ? "NHIS API" : "예비 후보"}</p>
+                  <p className="text-[11px] font-bold text-slate-500">{candidate.id.startsWith("NHIS-LTC") ? "공공데이터" : "예비 후보"}</p>
                   <p className="font-semibold text-ink">{candidate.name}</p>
                   <p className="text-slate-600">{candidate.distanceKm.toFixed(1)}km · {candidate.operatingWindow}</p>
                 </article>
