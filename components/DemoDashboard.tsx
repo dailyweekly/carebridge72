@@ -2,7 +2,20 @@
 
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { Activity, ArrowRight, Camera, ClipboardCheck, FileText, Languages, ShieldCheck, Timer, UserRoundCheck, Wand2 } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  Building2,
+  Camera,
+  ClipboardCheck,
+  FileText,
+  Languages,
+  ListChecks,
+  ShieldCheck,
+  Timer,
+  UserRoundCheck,
+  Wand2
+} from "lucide-react";
 import { AuditLogPanel } from "./AuditLogPanel";
 import { PatientInputForm } from "./PatientInputForm";
 import { RiskResultCard } from "./RiskResultCard";
@@ -62,10 +75,17 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       <section className="mb-5 rounded-md border border-line bg-white p-5 shadow-soft">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="mb-2 text-sm font-bold text-teal">CareBridge72</p>
-            <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">퇴원 후 72시간 통합돌봄 워크스페이스</h1>
-            <p className="mt-3 text-base leading-7 text-slate-700">
-              공공 담당자와 병원 사회사업실이 위험 신호, 지역 후보, 가족 안내문, 판단 기록을 한 흐름에서 처리하는 업무 화면입니다.
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <p className="rounded-md bg-teal px-2.5 py-1 text-sm font-black text-white">CareBridge72</p>
+              <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-bold text-slate-700">
+                담당자용 퇴원 사례 검토 SaaS
+              </span>
+            </div>
+            <h1 className="text-2xl font-black leading-tight tracking-normal text-ink sm:text-4xl">
+              퇴원 직후 돌봄 공백을 한 화면에서 검토합니다
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-700">
+              위험 신호, 지역 돌봄 후보, 가족 안내문, 판단 기록을 담당자 업무 순서대로 묶어 72시간 내 초기 확인을 빠르게 돕습니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
               <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
@@ -74,13 +94,28 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
             </div>
             <div className="mt-5 grid gap-2 sm:grid-cols-3">
-              <HeroValue icon={<Timer size={16} />} label="3분 검토" text="사례 입력부터 초안까지" />
-              <HeroValue icon={<FileText size={16} />} label="문서화 보조" text="인계·가족 안내 초안" />
+              <HeroValue icon={<Timer size={16} />} label="3분 검토" text="P003 사례 기준 즉시 시연" />
+              <HeroValue icon={<FileText size={16} />} label="업무 산출물" text="인계 요약·가족 안내 초안" />
               <HeroValue icon={<Languages size={16} />} label="다국어 지원" text="ko/en/vi/zh 템플릿" />
             </div>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-2 lg:w-[360px] lg:grid-cols-1">
+          <div className="grid gap-3 rounded-md border border-line bg-panel p-3 sm:grid-cols-2 lg:w-[380px] lg:grid-cols-1">
+            <div className="rounded-md bg-white p-3">
+              <p className="text-xs font-black text-teal">업무 시작</p>
+              <p className="mt-1 text-lg font-black text-ink">담당자 업무 시작</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                일반 검토는 아래 화면에서, AI 초안 생성은 접근 코드 입력 후 진행합니다.
+              </p>
+            </div>
+            <a
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-panel"
+              href="#case-review"
+            >
+              <ListChecks size={17} />
+              현재 화면에서 검토
+              <ArrowRight size={17} />
+            </a>
             <a
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-teal px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0b5f59]"
               href="/workspace"
@@ -96,18 +131,16 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               <Camera size={17} />
               별첨 캡처 화면
             </a>
-            <p className="text-xs leading-5 text-slate-500 sm:col-span-2 lg:col-span-1">
-              현재 화면은 사례 검토 흐름입니다. 문서 초안 생성은 접근 코드 확인 후 AI 작업 화면에서 실행합니다.
-            </p>
           </div>
         </div>
+        <CommercialFitStrip />
       </section>
       ) : null}
 
       {!captureMode ? <DemoFlow /> : null}
 
       {!captureMode ? (
-        <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div id="case-review" className="grid scroll-mt-4 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
           <PatientInputForm
             patient={patient}
             patients={initialPatients}
@@ -195,6 +228,45 @@ function HeroValue({ icon, label, text }: { icon: ReactNode; label: string; text
         {label}
       </div>
       <p className="mt-1 text-xs leading-5 text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function CommercialFitStrip() {
+  const items = [
+    {
+      icon: <Building2 size={17} />,
+      label: "적용 대상",
+      value: "시군 통합돌봄 · 병원 사회사업실"
+    },
+    {
+      icon: <ClipboardCheck size={17} />,
+      label: "입력",
+      value: "가명 사례 · 생활환경 · 거주지역"
+    },
+    {
+      icon: <FileText size={17} />,
+      label: "출력",
+      value: "위험 신호 · 후보 정보 · 안내 초안"
+    },
+    {
+      icon: <ShieldCheck size={17} />,
+      label: "운영 방식",
+      value: "담당자 판단 보조 · 직접 연결 없음"
+    }
+  ];
+
+  return (
+    <div className="mt-5 grid gap-2 border-t border-line pt-4 md:grid-cols-4">
+      {items.map((item) => (
+        <article key={item.label} className="rounded-md border border-line bg-white p-3">
+          <div className="mb-2 flex items-center gap-2 text-teal">
+            {item.icon}
+            <p className="text-xs font-black text-slate-500">{item.label}</p>
+          </div>
+          <p className="text-sm font-bold leading-5 text-ink">{item.value}</p>
+        </article>
+      ))}
     </div>
   );
 }

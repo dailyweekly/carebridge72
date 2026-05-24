@@ -49,9 +49,14 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
       </div>
 
       <div className="mb-4 rounded-md border border-line bg-panel p-3 text-sm">
-        <span className={pass ? "font-bold text-teal" : "font-bold text-cranberry"}>
-          운영 원칙 확인: {pass ? "통과" : "담당자 검토 필요"}
-        </span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span className={pass ? "font-bold text-teal" : "font-bold text-cranberry"}>
+            운영 원칙 확인: {pass ? "통과" : "담당자 검토 필요"}
+          </span>
+          <span className="rounded bg-white px-2 py-1 text-xs font-bold text-slate-600">
+            전달 전 담당자 최종 확인
+          </span>
+        </div>
         {!pass ? (
           <span className="ml-2 text-slate-700">
             {[
@@ -70,7 +75,7 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
       <div className="mt-3 rounded-md border border-line bg-white p-3">
         <div className="mb-2 flex items-center gap-2">
           <Printer size={16} className="text-teal" />
-          <h3 className="text-sm font-bold text-ink">담당자 검토용 안내문 미리보기</h3>
+          <h3 className="text-sm font-bold text-ink">가족 전달 전 확인 항목</h3>
         </div>
         <ul className="grid gap-2 text-sm leading-6 text-slate-700 md:grid-cols-3">
           <li className="rounded-md bg-panel p-2">응급 신호 발생 시 공공 창구 또는 응급 서비스를 먼저 안내</li>

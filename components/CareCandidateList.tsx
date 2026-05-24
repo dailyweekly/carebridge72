@@ -45,6 +45,12 @@ export function CareCandidateList({
         </span>
       </div>
 
+      <div className="mb-4 grid gap-2 md:grid-cols-3">
+        <ReviewCriterion label="지역 일치" text="거주 시군 기준으로 후보를 좁힙니다." />
+        <ReviewCriterion label="카테고리 다양성" text="방문·식사·이동 등 공백 유형을 나눠 봅니다." />
+        <ReviewCriterion label="담당자 판단" text="후보는 비교 자료이며 직접 연결하지 않습니다." />
+      </div>
+
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {candidates.map((candidate) => {
           const status = reviewState[candidate.id] ?? "검토 대상";
@@ -103,5 +109,14 @@ export function CareCandidateList({
         })}
       </div>
     </section>
+  );
+}
+
+function ReviewCriterion({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-md border border-line bg-panel p-3">
+      <p className="text-sm font-black text-ink">{label}</p>
+      <p className="mt-1 text-xs leading-5 text-slate-600">{text}</p>
+    </div>
   );
 }

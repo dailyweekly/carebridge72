@@ -12,6 +12,7 @@ type RiskResultCardProps = {
 
 export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskResultCardProps) {
   const reviewSignal = assessCaseReview(patient, risk);
+  const action = getPrimaryAction(risk.band);
   const tone =
     risk.band === "HIGH"
       ? "border-cranberry bg-rose-50 text-cranberry"
@@ -55,6 +56,14 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
         </div>
       </div>
 
+      <div className="mb-4 grid gap-3 rounded-md border border-line bg-panel p-3 md:grid-cols-[0.8fr_1.2fr]">
+        <div>
+          <p className="text-xs font-black text-slate-500">업무 결론</p>
+          <p className="mt-1 text-lg font-black text-ink">{action.title}</p>
+        </div>
+        <p className="text-sm leading-6 text-slate-700">{action.detail}</p>
+      </div>
+
       <ol className="grid gap-2 sm:grid-cols-3">
         {risk.reasons.map((reason) => (
           <li key={reason} className="rounded-md border border-line bg-panel p-3 text-sm leading-6 text-slate-700">
@@ -95,4 +104,23 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
 function formatRemainingHours(hours: number) {
   if (hours < 0) return `72시간 초과 ${Math.abs(hours)}h`;
   return `잔여 ${hours}h`;
+}
+
+function getPrimaryAction(band: RiskResult["band"]) {
+  if (band === "HIGH") {
+    return {
+      title: "검토 필요",
+      detail: "72시간 내 전화 확인, 식사·이동 공백, 가족 연락 가능 여부를 우선 확인합니다."
+    };
+  }
+  if (band === "MEDIUM") {
+    return {
+      title: "추적 확인",
+      detail: "외래 일정과 생활지원 공백을 확인하고, 필요 시 후보 자원을 보류 검토합니다."
+    };
+  }
+  return {
+    title: "기본 안내",
+    detail: "일반 안내문을 전달하고, 증상 변화나 생활 공백이 생기면 담당 창구로 확인하도록 안내합니다."
+  };
 }

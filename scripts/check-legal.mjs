@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const nextEnvPath = path.join(root, "next-env.d.ts");
+const localHost = "localhost";
 const rules = JSON.parse(fs.readFileSync(path.join(root, "data", "legal_safety_rules.json"), "utf8"));
 const scannedDirs = ["app", "components", "lib", "data"];
 const excludedFiles = new Set(["legal_safety_rules.json"]);
@@ -54,15 +56,15 @@ function walk(current) {
 }
 
 async function scanRuntimeOutputs() {
-  const host = "127.0.0.1";
   const reusableBaseUrl = process.env.LEGAL_CHECK_BASE_URL;
-  let baseUrl = reusableBaseUrl ?? `http://${host}:3102`;
+  const originalNextEnv = readOptionalFile(nextEnvPath);
+  let baseUrl = reusableBaseUrl ?? (await findReusableBaseUrl()) ?? `http://${localHost}:3102`;
   let server;
 
-  if (!reusableBaseUrl) {
+  if (!reusableBaseUrl && !baseUrl.endsWith(":3108") && !baseUrl.endsWith(":3000")) {
     const port = 3102;
     const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
-    server = spawn(process.execPath, [nextBin, "dev", "--hostname", host, "--port", String(port)], {
+    server = spawn(process.execPath, [nextBin, "dev", "--hostname", localHost, "--port", String(port)], {
       cwd: root,
       stdio: "ignore",
       detached: false
@@ -97,6 +99,42 @@ async function scanRuntimeOutputs() {
     await browser.close();
   } finally {
     server?.kill();
+    restoreFileIfChanged(nextEnvPath, originalNextEnv);
+  }
+}
+
+function readOptionalFile(filePath) {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+function restoreFileIfChanged(filePath, originalContent) {
+  if (originalContent === null) return;
+  const currentContent = readOptionalFile(filePath);
+  if (currentContent !== originalContent) {
+    fs.writeFileSync(filePath, originalContent);
+  }
+}
+
+async function findReusableBaseUrl() {
+  for (const candidate of [`http://${localHost}:3108`, `http://${localHost}:3000`]) {
+    if (await isCareBridgeServer(candidate)) return candidate;
+  }
+  return null;
+}
+
+async function isCareBridgeServer(baseUrl) {
+  try {
+    const response = await fetch(baseUrl);
+    if (!response.ok) return false;
+    const text = await response.text();
+    return text.includes("CareBridge72") && (await isServerReady(`${baseUrl}/capture`));
+  } catch {
+    return false;
   }
 }
 
