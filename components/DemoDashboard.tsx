@@ -75,7 +75,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
   const guideReady = koreanGuide.safety.pass && foreignGuide.safety.pass;
 
   return (
-    <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl"}`}>
+    <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl pb-28 sm:pb-6"}`}>
       {!captureMode ? (
       <section className="mb-5 rounded-md border border-line bg-white p-5 shadow-soft">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
@@ -224,6 +224,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       ) : null}
 
       {!captureMode ? <AuditLogPanel logs={logs} /> : null}
+      {!captureMode ? <MobileActionBar /> : null}
     </main>
   );
 
@@ -239,6 +240,29 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       return [entry, ...current].slice(0, 6);
     });
   }
+}
+
+function MobileActionBar() {
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden" aria-label="모바일 빠른 작업">
+      <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
+        <a
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-black text-slate-800"
+          href="#case-review"
+        >
+          <ListChecks size={16} />
+          사례 검토
+        </a>
+        <a
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-black text-white"
+          href="/workspace"
+        >
+          <Wand2 size={16} />
+          AI 초안
+        </a>
+      </div>
+    </nav>
+  );
 }
 
 function CaseWorkGuide({
