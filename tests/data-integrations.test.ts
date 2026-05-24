@@ -20,4 +20,13 @@ describe("data integration readiness", () => {
     expect(claude?.configuredKeys).toEqual(["ANTHROPIC_API_KEY", "ANTHROPIC_MODEL", "WORKSPACE_ACCESS_CODE"]);
     expect(JSON.stringify(status)).not.toContain("secret-key");
   });
+
+  it("marks non-environment procedural integrations separately", () => {
+    const status = getIntegrationReadiness({});
+    const hiraCdm = status.find((item) => item.id === "HIRA_CDM");
+
+    expect(hiraCdm?.stage).toBe("procedural");
+    expect(hiraCdm?.configuredKeys).toEqual([]);
+    expect(hiraCdm?.missingKeys).toEqual([]);
+  });
 });

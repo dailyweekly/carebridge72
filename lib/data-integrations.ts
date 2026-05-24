@@ -1,4 +1,4 @@
-export type IntegrationStage = "configured" | "missing";
+export type IntegrationStage = "configured" | "missing" | "procedural";
 
 export type DataIntegration = {
   id: string;
@@ -82,6 +82,15 @@ export const dataIntegrations: DataIntegration[] = [
 
 export function getIntegrationReadiness(env: Record<string, string | undefined> = process.env) {
   return dataIntegrations.map((integration): IntegrationStatus => {
+    if (integration.envKeys.length === 0) {
+      return {
+        ...integration,
+        configuredKeys: [],
+        missingKeys: [],
+        stage: "procedural"
+      };
+    }
+
     const configuredKeys = integration.envKeys.filter((key) => Boolean(env[key]));
     const missingKeys = integration.envKeys.filter((key) => !env[key]);
     return {
