@@ -39,7 +39,7 @@ export function CaseDecisionPanel({
   const checks = [
     { label: "위험 점수와 상위 근거 확인", done: risk.reasons.length >= 3 },
     { label: "자원 후보 검토 상태 1건 이상 기록", done: reviewedCount > 0 },
-    { label: "가족 안내문 안전선 통과", done: guideSafetyPass },
+    { label: "가족 안내문 운영 원칙 확인", done: guideSafetyPass },
     { label: "담당자 판단 메모 작성", done: note.trim().length >= 10 }
   ];
   const completionCount = checks.filter((item) => item.done).length;

@@ -21,7 +21,7 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
       {showScreenNote ? (
         <CaptureCaption
           title="화면 04 · 가족 안내"
-          description="다국어 안내문, 안전선 검사 결과, 출처와 갱신일을 함께 표시합니다."
+          description="다국어 안내문, 운영 원칙 확인 결과, 출처와 갱신일을 함께 표시합니다."
         />
       ) : null}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -31,7 +31,7 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
             <h2 className="text-lg font-bold text-ink">가족 안내문</h2>
           </div>
           <p className="mt-1 text-sm text-slate-600">
-            한국어와 외국어 1개를 함께 생성하며, 안전선 검사 실패 시 본문 표시를 차단합니다.
+            한국어와 외국어 1개를 함께 생성하며, 운영 원칙에 맞지 않는 문구는 본문 표시를 차단합니다.
           </p>
         </div>
         <button
@@ -50,7 +50,7 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
 
       <div className="mb-4 rounded-md border border-line bg-panel p-3 text-sm">
         <span className={pass ? "font-bold text-teal" : "font-bold text-cranberry"}>
-          안전선 검사: {pass ? "통과" : "담당자 검토 필요"}
+          운영 원칙 확인: {pass ? "통과" : "담당자 검토 필요"}
         </span>
         {!pass ? (
           <span className="ml-2 text-slate-700">

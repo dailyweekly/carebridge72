@@ -276,7 +276,7 @@ function SafetyZonePanel() {
     <section className="rounded-md border border-line bg-white p-4 shadow-soft">
       <div className="mb-4 flex items-center gap-2">
         <ShieldCheck size={20} className="text-teal" />
-        <h2 className="text-lg font-bold text-ink">법률 안전선 4-Zone</h2>
+        <h2 className="text-lg font-bold text-ink">운영 원칙 4-Zone</h2>
       </div>
       <div className="grid gap-3">
         {zones.map(([name, control]) => (

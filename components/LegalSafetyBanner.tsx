@@ -11,7 +11,7 @@ export function LegalSafetyBanner({ placement }: LegalSafetyBannerProps) {
     <div className={`${sticky} border-y border-line bg-white px-4 py-3 text-sm text-slate-700`}>
       <div className="mx-auto flex max-w-7xl items-start gap-3">
         <span className="mt-0.5 rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-900 whitespace-nowrap">
-          안전선
+          운영 원칙
         </span>
         <p className="m-0 leading-6">{copy}</p>
       </div>

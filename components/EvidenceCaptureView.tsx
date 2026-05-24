@@ -29,7 +29,7 @@ export function EvidenceCaptureView({
     >
       <CaptureCaption
         title="별첨5 캡처 화면"
-        description="작성일: 2026-05-23 / 가명 데이터(P003) / 모델 버전: CB72-RULE-XGB-SURROGATE-2026.05 / 안전선 검사: 통과 / 본 화면은 심평원 보건의료빅데이터·AI 활용 창업경진대회 시제품 증빙(별첨5)용입니다."
+        description="작성일: 2026-05-23 / 가명 데이터(P003) / 모델 버전: CB72-RULE-XGB-SURROGATE-2026.05 / 운영 원칙 확인: 통과 / 본 화면은 심평원 보건의료빅데이터·AI 활용 창업경진대회 시제품 증빙(별첨5)용입니다."
       />
       <div className="mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -43,7 +43,7 @@ export function EvidenceCaptureView({
           </span>
           <span className="rounded-md border border-line bg-white px-2 py-1">가명 사례 {patient.id}</span>
           <span className="rounded-md border border-line bg-white px-2 py-1">
-            안전선 검사: {safetyPass ? "통과" : "검토 필요"}
+            운영 원칙 확인: {safetyPass ? "통과" : "검토 필요"}
           </span>
         </div>
       </div>
@@ -110,7 +110,7 @@ export function EvidenceCaptureView({
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold text-teal">화면 04 · 가족 안내</p>
-                <h3 className="mt-1 text-lg font-black text-ink">가족 안내문 및 안전선 검사</h3>
+                <h3 className="mt-1 text-lg font-black text-ink">가족 안내문 및 운영 원칙 확인</h3>
               </div>
               <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-bold text-slate-700">
                 {safetyPass ? "통과" : "담당자 검토 필요"}

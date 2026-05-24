@@ -22,7 +22,7 @@ export function generateFamilyGuide(
   const safety = validateLegalSafety({ text });
 
   return {
-    text: safety.pass ? text : "안전선 검사 실패 - 담당자 검토 필요",
+    text: safety.pass ? text : "운영 원칙 확인 필요 - 담당자 검토 필요",
     language,
     safety,
     sourceUrls: [

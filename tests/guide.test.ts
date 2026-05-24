@@ -27,7 +27,7 @@ describe("generateFamilyGuide", () => {
   it("returns visible text only after safety validation passes", () => {
     const guide = generateFamilyGuide(patient, risk, candidates, "en");
     expect(guide.safety.pass).toBe(true);
-    expect(guide.text).not.toContain("안전선 검사 실패");
+    expect(guide.text).not.toContain("운영 원칙 확인 필요");
   });
 
   it("selects vi and zh diagnosis-specific templates for P004 and P002", () => {

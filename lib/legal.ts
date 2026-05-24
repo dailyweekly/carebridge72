@@ -31,7 +31,7 @@ export function validateLegalSafety({ text }: { text: string }): LegalValidation
 export function assertSafeText(text: string): string {
   const validation = validateLegalSafety({ text });
   if (!validation.pass) {
-    return "안전선 검사 실패 - 담당자 검토 필요";
+    return "운영 원칙 확인 필요 - 담당자 검토 필요";
   }
   return text;
 }
