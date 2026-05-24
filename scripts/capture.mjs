@@ -10,6 +10,7 @@ const host = "127.0.0.1";
 const port = 3101;
 const spawnedBaseUrl = `http://${host}:${port}`;
 const reusableBaseUrl = process.env.CAPTURE_BASE_URL;
+const workspaceAccessCode = process.env.WORKSPACE_ACCESS_CODE || "7272";
 const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 
 await fs.mkdir(captureDir, { recursive: true });
@@ -42,6 +43,15 @@ try {
   await page.goto(`${baseUrl}/capture`, { waitUntil: "networkidle" });
   await hideDevChrome(page);
   await page.screenshot({ path: path.join(captureDir, "05-full.png"), fullPage: true });
+
+  await page.goto(`${baseUrl}/workspace`, { waitUntil: "networkidle" });
+  await hideDevChrome(page);
+  await page.fill("input[type='password']", workspaceAccessCode);
+  await page.click("button:has-text('입장')");
+  await page.waitForTimeout(7000);
+  await page.screenshot({ path: path.join(captureDir, "06-workspace.png"), fullPage: false });
+  await page.locator("text=병원 사회사업실 기준정보").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(captureDir, "07-data-panels.png"), fullPage: false });
 
   await browser.close();
   console.log("Capture files written to captures/.");
