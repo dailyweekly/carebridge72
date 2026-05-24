@@ -25,7 +25,7 @@ export function CareCandidateList({
   const [excludeReasons, setExcludeReasons] = useState<Record<string, string>>({});
 
   return (
-    <section id="candidates" className="rounded-md border border-line bg-white p-4 shadow-soft">
+    <section id="candidates" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
       {showScreenNote ? (
         <CaptureCaption
           title="화면 03 · 자원 후보"
@@ -54,14 +54,24 @@ export function CareCandidateList({
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {candidates.map((candidate) => {
           const status = reviewState[candidate.id] ?? "검토 대상";
+          const statusTone =
+            status === "제외"
+              ? "border-slate-300 bg-slate-50"
+              : status === "보류"
+                ? "border-amber-300 bg-amber-50"
+                : "border-line bg-white";
           return (
-          <article key={candidate.id} className="rounded-md border border-line p-3">
+          <article key={candidate.id} className={`rounded-md border p-3 shadow-sm transition hover:shadow-soft ${statusTone}`}>
             <div className="mb-2 flex items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-teal">{categoryLabels[candidate.category]}</p>
+                <p className="inline-flex rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal">
+                  {categoryLabels[candidate.category]}
+                </p>
                 <h3 className="mt-1 text-base font-bold text-ink">{candidate.name}</h3>
               </div>
-              <Stethoscope className="shrink-0 text-slate-400" size={18} />
+              <span className="rounded-md border border-line bg-white px-2 py-1 text-xs font-bold text-slate-600">
+                {status}
+              </span>
             </div>
             <dl className="space-y-1 text-sm text-slate-700">
               <div className="flex justify-between gap-3">
@@ -79,9 +89,12 @@ export function CareCandidateList({
             </dl>
             <p className="mt-3 rounded-md bg-panel p-2 text-sm leading-5 text-slate-700">{candidate.notes}</p>
             <div className="mt-3 rounded-md border border-line bg-panel p-2">
-              <label className="block text-xs font-bold text-slate-600">담당자 검토 상태</label>
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                <Stethoscope size={14} className="text-teal" />
+                담당자 검토 상태
+              </label>
               <select
-                className="mt-1 w-full rounded border border-line bg-white px-2 py-1.5 text-sm"
+                className="mt-1 min-h-10 w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm"
                 value={status}
                 onChange={(event) => {
                   const nextStatus = event.target.value as CandidateReviewStatus;

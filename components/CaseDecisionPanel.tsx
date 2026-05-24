@@ -52,7 +52,7 @@ export function CaseDecisionPanel({
   ].join("\n");
 
   return (
-    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
+    <section id="decision" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">

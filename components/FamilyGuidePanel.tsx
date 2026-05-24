@@ -17,7 +17,7 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
   const pass = koreanGuide.safety.pass && foreignGuide.safety.pass;
 
   return (
-    <section id="guide" className="rounded-md border border-line bg-white p-4 shadow-soft">
+    <section id="guide" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
       {showScreenNote ? (
         <CaptureCaption
           title="화면 04 · 가족 안내"
@@ -87,7 +87,9 @@ export function FamilyGuidePanel({ koreanGuide, foreignGuide, onCopy, showScreen
       <div className="mt-3 rounded-md border border-line bg-panel p-3 text-xs leading-5 text-slate-600">
         <span className="font-bold text-ink">출처·갱신일</span> 공공 안내문 템플릿 (보건복지부·HIRA,
         {koreanGuide.updatedAt} 기준).
-        원문 기준 URL: {[...new Set([...koreanGuide.sourceUrls, ...foreignGuide.sourceUrls])].join(" · ")}
+        <span className="break-all">
+          원문 기준 URL: {[...new Set([...koreanGuide.sourceUrls, ...foreignGuide.sourceUrls])].join(" · ")}
+        </span>
       </div>
     </section>
   );

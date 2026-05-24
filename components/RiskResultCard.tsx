@@ -21,7 +21,7 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
         : "border-teal bg-teal-50 text-teal";
 
   return (
-    <section id="risk" className="rounded-md border border-line bg-white p-4 shadow-soft">
+    <section id="risk" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
       {showScreenNote ? (
         <CaptureCaption
           title="화면 02 · 위험 검토"
@@ -65,9 +65,12 @@ export function RiskResultCard({ risk, patient, showScreenNote = false }: RiskRe
       </div>
 
       <ol className="grid gap-2 sm:grid-cols-3">
-        {risk.reasons.map((reason) => (
+        {risk.reasons.map((reason, index) => (
           <li key={reason} className="rounded-md border border-line bg-panel p-3 text-sm leading-6 text-slate-700">
-            {reason}
+            <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-black text-teal">
+              {index + 1}
+            </span>
+            <p>{reason}</p>
           </li>
         ))}
       </ol>

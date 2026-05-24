@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Activity,
-  ArrowRight,
   Building2,
   Camera,
+  ChevronRight,
   ClipboardCheck,
   FileText,
   Languages,
@@ -74,7 +74,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
     <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl"}`}>
       {!captureMode ? (
       <section className="mb-5 rounded-md border border-line bg-white p-5 shadow-soft">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="max-w-3xl">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <p className="rounded-md bg-teal px-2.5 py-1 text-sm font-black text-white">CareBridge72</p>
@@ -99,14 +99,19 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               <HeroValue icon={<FileText size={16} />} label="업무 산출물" text="인계 요약·가족 안내 초안" />
               <HeroValue icon={<Languages size={16} />} label="다국어 지원" text="ko/en/vi/zh 템플릿" />
             </div>
+            <div className="mt-4 grid gap-2 rounded-md border border-line bg-panel p-3 text-sm text-slate-700 sm:grid-cols-3">
+              <HeroMetric label="현재 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} />
+              <HeroMetric label="후보 정보" value={`${resourceMatch.candidates.length}건 비교`} />
+              <HeroMetric label="다음 행동" value={risk.band === "HIGH" ? "72시간 내 확인" : "일반 확인"} />
+            </div>
           </div>
 
-          <div className="grid gap-3 rounded-md border border-line bg-panel p-3 sm:grid-cols-2 lg:w-[380px] lg:grid-cols-1">
+          <div className="grid gap-3 rounded-md border border-line bg-panel p-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-md bg-white p-3">
               <p className="text-xs font-black text-teal">업무 시작</p>
-              <p className="mt-1 text-lg font-black text-ink">담당자 업무 시작</p>
+              <p className="mt-1 text-lg font-black text-ink">먼저 사례를 확인하세요</p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                일반 검토는 아래 화면에서, AI 초안 생성은 접근 코드 입력 후 진행합니다.
+                위험 신호와 후보 정보를 확인한 뒤, 필요할 때 AI 초안 화면으로 이동합니다.
               </p>
             </div>
             <a
@@ -114,16 +119,16 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               href="#case-review"
             >
               <ListChecks size={17} />
-              현재 화면에서 검토
-              <ArrowRight size={17} />
+              사례 검토 시작
+              <ChevronRight size={17} />
             </a>
             <a
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-teal px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0b5f59]"
               href="/workspace"
             >
               <Wand2 size={17} />
-              AI 작업 화면으로 이동
-              <ArrowRight size={17} />
+              AI 초안 생성
+              <ChevronRight size={17} />
             </a>
             <a
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-panel px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-white"
@@ -148,19 +153,21 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       {!captureMode ? <DemoFlow /> : null}
 
       {!captureMode ? (
-        <div id="case-review" className="grid scroll-mt-4 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-          <PatientInputForm
-            patient={patient}
-            patients={initialPatients}
-            onChange={(nextPatient) => {
-              setPatient(nextPatient);
-              setCandidateReviewState({});
-              appendLog("담당자 입력", `${nextPatient.id} 가명 사례 입력값을 갱신했습니다.`);
-            }}
-            onPrivacyBlocked={(detail) => appendLog("민감정보 차단", detail)}
-            foreignLanguage={foreignLanguage}
-            onForeignLanguageChange={setForeignLanguage}
-          />
+        <div id="case-review" className="grid scroll-mt-20 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <div className="self-start lg:sticky lg:top-16">
+            <PatientInputForm
+              patient={patient}
+              patients={initialPatients}
+              onChange={(nextPatient) => {
+                setPatient(nextPatient);
+                setCandidateReviewState({});
+                appendLog("담당자 입력", `${nextPatient.id} 가명 사례 입력값을 갱신했습니다.`);
+              }}
+              onPrivacyBlocked={(detail) => appendLog("민감정보 차단", detail)}
+              foreignLanguage={foreignLanguage}
+              onForeignLanguageChange={setForeignLanguage}
+            />
+          </div>
           <section className="grid gap-5">
             <RiskResultCard risk={risk} patient={patient} />
             <CareCandidateList
@@ -236,6 +243,15 @@ function HeroValue({ icon, label, text }: { icon: ReactNode; label: string; text
         {label}
       </div>
       <p className="mt-1 text-xs leading-5 text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-white px-3 py-2">
+      <p className="text-xs font-bold text-slate-500">{label}</p>
+      <p className="mt-1 font-black text-ink">{value}</p>
     </div>
   );
 }
