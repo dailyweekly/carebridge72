@@ -21,7 +21,7 @@
     "id": "SRC-MOHW-CARE",
     "name": "통합돌봄 사업 시군구 현황·전담조직 DB",
     "provider": "보건복지부",
-    "use": "거주지 기반 공공 담당 조직 매핑과 정책 리포트 기준",
+    "use": "거주지 기반 공공 담당 조직 매핑과 관리자용 현황 분석 기준",
     "status": "MOCK_PUBLIC",
     "updateCycle": "공개 자료 갱신 시 반영",
     "url": "https://www.mohw.go.kr"

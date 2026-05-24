@@ -52,7 +52,7 @@ export const dataIntegrations: DataIntegration[] = [
     id: "KOSIS",
     name: "KOSIS OpenAPI",
     provider: "통계청",
-    purpose: "시군구 고령화, 인구 구조, 정책 KPI 보강",
+    purpose: "시군구 고령화와 지역 수요 지표 보강",
     envKeys: ["KOSIS_API_KEY"],
     obtainFrom: "KOSIS 공유서비스 → OPEN API 인증키 신청",
     url: "https://kosis.kr/openapi/index/",
