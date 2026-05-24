@@ -2,6 +2,7 @@ import { Building2, Database, FileCheck2, GitBranch, ShieldCheck, Sparkles, User
 import type { ReactNode } from "react";
 import { bandLabels, diagnosisLabels, regionLabels } from "@/lib/labels";
 import { assessCaseReview, sortCasesByReviewPriority } from "@/lib/case-review";
+import { dataIntegrations } from "@/lib/data-integrations";
 import { calculateRisk } from "@/lib/risk";
 import type { CareResource, Patient, PublicDataSource, ReviewCase, RiskResult } from "@/lib/types";
 
@@ -26,12 +27,53 @@ export function SolutionOperations({
     <section className="mt-6 grid gap-5">
       <CaseQueuePanel patients={patients} cases={cases} />
       <RoleModePanel />
+      <DataIntegrationPanel />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <ModelGovernancePanel sources={sources} activeRisk={activeRisk} />
         <SafetyZonePanel />
       </div>
       <ModelCardPanel activeRisk={activeRisk} />
       <PolicyAnalyticsPanel patients={patients} resources={resources} cases={cases} activePatient={activePatient} />
+    </section>
+  );
+}
+
+function DataIntegrationPanel() {
+  const topItems = dataIntegrations.filter((item) => item.priority !== "P3");
+  return (
+    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Database size={20} className="text-teal" />
+            <h2 className="text-lg font-bold text-ink">실데이터 연동 준비</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            공개 API는 서비스키 확보 즉시 연결하고, HIRA CDM은 보안 분석 환경에서 별도 학습 파이프라인으로 처리합니다.
+          </p>
+        </div>
+        <a
+          className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-panel px-3 py-2 text-sm font-bold text-slate-700"
+          href="/api/integrations/status"
+        >
+          연동 상태 JSON
+        </a>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        {topItems.map((item) => (
+          <article key={item.id} className="rounded-md border border-line bg-panel p-3">
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <p className="font-bold text-ink">{item.name}</p>
+              <span className="rounded bg-white px-2 py-0.5 text-xs font-black text-teal">{item.priority}</span>
+            </div>
+            <p className="text-xs font-bold text-slate-500">{item.provider}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">{item.purpose}</p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              필요 키: {item.envKeys.length > 0 ? item.envKeys.join(", ") : "보안 분석 환경 내 신청"}
+            </p>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
