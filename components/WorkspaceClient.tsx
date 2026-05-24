@@ -23,6 +23,7 @@ import { assessCaseReview } from "@/lib/case-review";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
+import { resolveWorkspaceLanguage } from "@/lib/workspace-routing";
 import type { HiraHospitalSource, HospitalReference } from "@/lib/hira-hospital";
 import type { CareResource, Language, Patient, ResourceMatch } from "@/lib/types";
 import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
@@ -30,20 +31,27 @@ import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
 type WorkspaceClientProps = {
   initialPatients: Patient[];
   resources: CareResource[];
+  initialPatientId?: string;
+  initialLanguage?: Language;
 };
 
 type DraftState = Record<DraftKind, DraftResponse | null>;
 type ResourceStatus = "loading" | "live" | "fallback";
 type HospitalStatus = "loading" | HiraHospitalSource;
 
-export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
-  const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
+export function WorkspaceClient({ initialPatients, resources, initialPatientId, initialLanguage }: WorkspaceClientProps) {
+  const initial =
+    initialPatients.find((patient) => patient.id === initialPatientId) ??
+    initialPatients.find((patient) => patient.id === "P003") ??
+    initialPatients[0];
   const [accessGranted, setAccessGranted] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [accessError, setAccessError] = useState("");
   const [accessPending, setAccessPending] = useState(false);
   const [patient, setPatient] = useState<Patient>(initial);
-  const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>("en");
+  const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>(
+    resolveWorkspaceLanguage(initial, initialLanguage)
+  );
   const [memo, setMemo] = useState("72시간 내 전화 확인 후 식사·이동 공백과 가족 연락 가능 여부를 확인합니다.");
   const [pendingKind, setPendingKind] = useState<DraftKind | null>(null);
   const [drafts, setDrafts] = useState<DraftState>({ handoff: null, family: null });

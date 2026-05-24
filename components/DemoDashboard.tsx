@@ -30,6 +30,7 @@ import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
 import { bandLabels } from "@/lib/labels";
+import { buildWorkspaceHref, resolveWorkspaceLanguage } from "@/lib/workspace-routing";
 import type {
   AuditLogEntry,
   CandidateReviewStatus,
@@ -48,7 +49,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
   const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
   const [patient, setPatient] = useState<Patient>(initial);
   const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>(
-    initial.preferredLanguage === "vi" ? "vi" : "en"
+    resolveWorkspaceLanguage(initial)
   );
   const [candidateReviewState, setCandidateReviewState] = useState<Record<string, CandidateReviewStatus>>({});
   const [logs, setLogs] = useState<AuditLogEntry[]>([
@@ -73,6 +74,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
   );
   const reviewedCandidateCount = Object.values(candidateReviewState).filter((status) => status !== "검토 대상").length;
   const guideReady = koreanGuide.safety.pass && foreignGuide.safety.pass;
+  const workspaceHref = buildWorkspaceHref(patient.id, foreignLanguage);
 
   return (
     <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl pb-28 sm:pb-6"}`}>
@@ -128,7 +130,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
             </a>
             <a
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-teal px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0b5f59]"
-              href="/workspace"
+              href={workspaceHref}
             >
               <Wand2 size={17} />
               AI 초안 생성
@@ -227,7 +229,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       ) : null}
 
       {!captureMode ? <AuditLogPanel logs={logs} /> : null}
-      {!captureMode ? <MobileActionBar /> : null}
+      {!captureMode ? <MobileActionBar workspaceHref={workspaceHref} /> : null}
     </main>
   );
 
@@ -245,7 +247,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
   }
 }
 
-function MobileActionBar() {
+function MobileActionBar({ workspaceHref }: { workspaceHref: string }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden" aria-label="모바일 빠른 작업">
       <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
@@ -258,7 +260,7 @@ function MobileActionBar() {
         </a>
         <a
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-black text-white"
-          href="/workspace"
+          href={workspaceHref}
         >
           <Wand2 size={16} />
           AI 초안
