@@ -27,6 +27,15 @@ export function getServiceHealth(env: Record<string, string | undefined> = proce
       llm: env.ANTHROPIC_API_KEY || env.CLAUDE_API_KEY ? "claude-enabled" : "fallback-only",
       hiraCdm: "procedural-request"
     },
+    operationalControls: {
+      workspaceAccess: env.WORKSPACE_ACCESS_CODE ? "enabled" : "default-code",
+      llmCostControl: "workspace-gated",
+      llmFailureMode: "deterministic-fallback",
+      publicApiFailureMode: "mock-fallback",
+      privacyInputFilter: "enabled",
+      outputPolicyCheck: "enabled",
+      patientIdentifiers: "not-collected"
+    },
     readiness: summary,
     routes: [
       "/",

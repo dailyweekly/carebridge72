@@ -16,6 +16,9 @@ describe("service health", () => {
     expect(health.riskModelVersion).toContain("CB72");
     expect(health.dataMode.publicApi).toBe("enabled-with-fallback");
     expect(health.dataMode.llm).toBe("claude-enabled");
+    expect(health.operationalControls.workspaceAccess).toBe("enabled");
+    expect(health.operationalControls.llmCostControl).toBe("workspace-gated");
+    expect(health.operationalControls.patientIdentifiers).toBe("not-collected");
     expect(health.routes).toContain("/api/health");
     expect(serialized).not.toContain("secret-anthropic");
     expect(serialized).not.toContain("secret-public-data");
@@ -27,6 +30,8 @@ describe("service health", () => {
     expect(health.status).toBe("degraded");
     expect(health.dataMode.publicApi).toBe("fallback-only");
     expect(health.dataMode.llm).toBe("fallback-only");
+    expect(health.operationalControls.workspaceAccess).toBe("default-code");
+    expect(health.operationalControls.outputPolicyCheck).toBe("enabled");
     expect(health.readiness.p1Missing).toContain("ANTHROPIC_CLAUDE");
     expect(health.readiness.p1Missing).toContain("DATA_GO_KR_NHIS_LTC");
   });
