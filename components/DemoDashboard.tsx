@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { Activity, ClipboardCheck, ShieldCheck, UserRoundCheck } from "lucide-react";
+import { Activity, ArrowRight, Camera, ClipboardCheck, ShieldCheck, UserRoundCheck, Wand2 } from "lucide-react";
 import { AuditLogPanel } from "./AuditLogPanel";
 import { PatientInputForm } from "./PatientInputForm";
 import { RiskResultCard } from "./RiskResultCard";
@@ -64,22 +64,43 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
   return (
     <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl"}`}>
       {!captureMode ? (
-      <section className="mb-5 flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="mb-2 text-sm font-semibold text-teal">CareBridge72</p>
-          <h1 className="text-3xl font-bold tracking-normal text-ink">퇴원 후 72시간 사례 검토</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            담당자가 위험 신호, 지역 돌봄 자원 후보, 가족 안내문, 정책 지표를 한 곳에서 확인하는
-            통합돌봄 업무 화면입니다.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-xs text-slate-700">
-          <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
-          <StatusPill icon={<ClipboardCheck size={15} />} text="안전검사 통과" />
-          <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 화면" />
-          <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
-          {!captureMode ? <StatusLink href="/workspace" text="AI 작업 화면" /> : null}
-          {!captureMode ? <StatusLink href="/capture" text="캡처 화면" /> : null}
+      <section className="mb-5 rounded-md border border-line bg-white p-5 shadow-soft">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="mb-2 text-sm font-bold text-teal">CareBridge72</p>
+            <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">퇴원 후 72시간 통합돌봄 검토</h1>
+            <p className="mt-3 text-base leading-7 text-slate-700">
+              위험 신호, 지역 돌봄 자원 후보, 가족 안내문, 담당자 판단 기록을 한 화면에서 확인하는
+              실무자용 업무 화면입니다.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
+              <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
+              <StatusPill icon={<ClipboardCheck size={15} />} text="운영 원칙 확인" />
+              <StatusPill icon={<UserRoundCheck size={15} />} text="담당자 보조" />
+              <StatusPill icon={<ShieldCheck size={15} />} text="직접 연결 없음" />
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2 lg:w-[360px] lg:grid-cols-1">
+            <a
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-teal px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0b5f59]"
+              href="/workspace"
+            >
+              <Wand2 size={17} />
+              AI 작업 화면으로 이동
+              <ArrowRight size={17} />
+            </a>
+            <a
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-panel px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-white"
+              href="/capture"
+            >
+              <Camera size={17} />
+              별첨 캡처 화면
+            </a>
+            <p className="text-xs leading-5 text-slate-500 sm:col-span-2 lg:col-span-1">
+              현재 화면은 전체 데모입니다. Claude 기반 초안 생성은 AI 작업 화면에서 실행합니다.
+            </p>
+          </div>
         </div>
       </section>
       ) : null}
@@ -169,20 +190,9 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
   }
 }
 
-function StatusLink({ href, text }: { href: string; text: string }) {
-  return (
-    <a
-      className="flex min-h-9 items-center justify-center rounded-md border border-line bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm"
-      href={href}
-    >
-      {text}
-    </a>
-  );
-}
-
 function StatusPill({ icon, text }: { icon: ReactNode; text: string }) {
   return (
-    <div className="flex min-h-9 items-center gap-2 rounded-md border border-line bg-white px-3 py-2 shadow-sm">
+    <div className="flex min-h-8 items-center gap-2 rounded-md border border-line bg-panel px-3 py-1.5">
       <span className="text-teal">{icon}</span>
       <span className="whitespace-nowrap font-medium">{text}</span>
     </div>
