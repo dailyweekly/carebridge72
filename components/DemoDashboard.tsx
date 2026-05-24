@@ -164,7 +164,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               onChange={(nextPatient) => {
                 setPatient(nextPatient);
                 setCandidateReviewState({});
-                appendLog("담당자 입력", `${nextPatient.id} 가명 사례 입력값을 갱신했습니다.`);
+                appendLog("담당자 입력", `${nextPatient.id} 시연용 사례 입력값을 갱신했습니다.`);
               }}
               onPrivacyBlocked={(detail) => appendLog("민감정보 차단", detail)}
               foreignLanguage={foreignLanguage}

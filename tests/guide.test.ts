@@ -30,6 +30,13 @@ describe("generateFamilyGuide", () => {
     expect(guide.text).not.toContain("운영 원칙 확인 필요");
   });
 
+  it("does not expose internal case IDs or enum labels in family-facing context", () => {
+    for (const lang of ["ko", "en", "vi", "zh"] as Language[]) {
+      const guide = generateFamilyGuide(patient, risk, candidates, lang);
+      expect(guide.text).not.toMatch(/P\d{3}|LOW|MEDIUM|HIGH|가명|pseudonym|ma gia danh|匿名编号/);
+    }
+  });
+
   it("selects vi and zh diagnosis-specific templates for P004 and P002", () => {
     const patientP004 = (patients as Patient[]).find((item) => item.id === "P004");
     const patientP002 = (patients as Patient[]).find((item) => item.id === "P002");
