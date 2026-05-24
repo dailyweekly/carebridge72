@@ -6,6 +6,7 @@ import {
   Activity,
   Building2,
   Camera,
+  CheckCircle2,
   ChevronRight,
   ClipboardCheck,
   FileText,
@@ -28,6 +29,7 @@ import { CaseDecisionPanel } from "./CaseDecisionPanel";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
+import { bandLabels } from "@/lib/labels";
 import type {
   AuditLogEntry,
   CandidateReviewStatus,
@@ -69,6 +71,8 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
     () => generateFamilyGuide(patient, risk, resourceMatch.candidates, foreignLanguage),
     [patient, risk, resourceMatch.candidates, foreignLanguage]
   );
+  const reviewedCandidateCount = Object.values(candidateReviewState).filter((status) => status !== "검토 대상").length;
+  const guideReady = koreanGuide.safety.pass && foreignGuide.safety.pass;
 
   return (
     <main className={`mx-auto px-4 py-6 sm:px-6 lg:px-8 ${captureMode ? "max-w-[860px]" : "max-w-7xl"}`}>
@@ -172,6 +176,14 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
             />
           </div>
           <section className="grid gap-5">
+            <CaseWorkGuide
+              patientId={patient.id}
+              riskScore={risk.score}
+              riskBand={risk.band}
+              candidateCount={resourceMatch.candidates.length}
+              reviewedCandidateCount={reviewedCandidateCount}
+              guideReady={guideReady}
+            />
             <RiskResultCard risk={risk} patient={patient} />
             <CareCandidateList
               key={patient.id}
@@ -193,7 +205,7 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               risk={risk}
               candidates={resourceMatch.candidates}
               candidateReviewState={candidateReviewState}
-              guideSafetyPass={koreanGuide.safety.pass && foreignGuide.safety.pass}
+              guideSafetyPass={guideReady}
               onDecisionCommit={(detail) => appendLog("담당자 판단", detail)}
             />
           </section>
@@ -227,6 +239,66 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
       return [entry, ...current].slice(0, 6);
     });
   }
+}
+
+function CaseWorkGuide({
+  patientId,
+  riskScore,
+  riskBand,
+  candidateCount,
+  reviewedCandidateCount,
+  guideReady
+}: {
+  patientId: string;
+  riskScore: number;
+  riskBand: "LOW" | "MEDIUM" | "HIGH";
+  candidateCount: number;
+  reviewedCandidateCount: number;
+  guideReady: boolean;
+}) {
+  const nextHref = reviewedCandidateCount === 0 ? "#candidates" : "#decision";
+  const nextCopy =
+    reviewedCandidateCount === 0
+      ? "후보 카드에서 검토 상태를 1건 이상 표시하면 담당자 판단으로 넘어가기 쉽습니다."
+      : "후보 검토가 시작되었습니다. 담당자 판단에 메모를 남기고 인계 요약을 확인하세요.";
+  const checks = [
+    { label: "사례", value: `${patientId} 확인`, done: true },
+    { label: "위험", value: `${bandLabels[riskBand]} ${riskScore}점`, done: true },
+    { label: "후보", value: reviewedCandidateCount > 0 ? `${reviewedCandidateCount}/${candidateCount}건 기록` : `${candidateCount}건 대기`, done: reviewedCandidateCount > 0 },
+    { label: "안내", value: guideReady ? "확인 통과" : "확인 필요", done: guideReady }
+  ];
+
+  return (
+    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <ListChecks className="text-teal" size={20} />
+            <h2 className="text-lg font-bold text-ink">오늘 처리할 일</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{nextCopy}</p>
+        </div>
+        <a
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-teal px-4 py-2 text-sm font-black text-white"
+          href={nextHref}
+        >
+          다음 작업으로 이동
+          <ChevronRight size={16} />
+        </a>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {checks.map((item) => (
+          <div key={item.label} className="rounded-md border border-line bg-panel p-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className={item.done ? "text-teal" : "text-slate-300"} />
+              <p className="text-sm font-black text-ink">{item.label}</p>
+            </div>
+            <p className="mt-1 text-sm leading-5 text-slate-600">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function StatusPill({ icon, text }: { icon: ReactNode; text: string }) {
