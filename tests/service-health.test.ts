@@ -19,6 +19,7 @@ describe("service health", () => {
     expect(health.operationalControls.workspaceAccess).toBe("enabled");
     expect(health.operationalControls.llmCostControl).toBe("workspace-gated");
     expect(health.operationalControls.patientIdentifiers).toBe("not-collected");
+    expect(health.routes).toContain("/status");
     expect(health.routes).toContain("/api/health");
     expect(serialized).not.toContain("secret-anthropic");
     expect(serialized).not.toContain("secret-public-data");

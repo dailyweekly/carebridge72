@@ -144,7 +144,7 @@ export default function ReadinessPage() {
               </Link>
               <Link
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-3 text-sm font-black text-slate-800"
-                href="/api/health"
+                href="/status"
               >
                 운영 상태 확인
                 <ArrowRight size={16} />

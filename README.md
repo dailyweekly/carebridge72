@@ -9,13 +9,14 @@ npm install
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 엽니다. 3000 포트가 사용 중이면 `npm run dev -- --port 3108`처럼 다른 포트를 지정합니다. 고정 시연 화면은 `/demo`, 실제 AI 문서화 작업 화면은 `/workspace`, 도입 검토 화면은 `/readiness`, 별첨 캡처 화면은 `/capture`입니다.
+브라우저에서 `http://localhost:3000`을 엽니다. 3000 포트가 사용 중이면 `npm run dev -- --port 3108`처럼 다른 포트를 지정합니다. 고정 시연 화면은 `/demo`, 실제 AI 문서화 작업 화면은 `/workspace`, 도입 검토 화면은 `/readiness`, 운영 상태 화면은 `/status`, 별첨 캡처 화면은 `/capture`입니다.
 
 Vercel 배포 URL:
 
 ```text
 https://carebridge72.vercel.app
 https://carebridge72.vercel.app/readiness
+https://carebridge72.vercel.app/status
 https://carebridge72.vercel.app/workspace
 https://carebridge72.vercel.app/capture
 ```
@@ -35,7 +36,7 @@ npm run verify:submission
 npm run capture
 ```
 
-`captures/01-input.png`, `captures/02-risk.png`, `captures/03-candidates.png`, `captures/04-guide.png`, `captures/05-full.png`, `captures/06-workspace.png`, `captures/07-hospital-reference.png`, `captures/08-mobile.png`가 생성됩니다.
+`captures/01-input.png`, `captures/02-risk.png`, `captures/03-candidates.png`, `captures/04-guide.png`, `captures/05-full.png`, `captures/06-workspace.png`, `captures/07-hospital-reference.png`, `captures/08-mobile.png`, `captures/09-status.png`가 생성됩니다.
 
 ## 2. 기술 스택
 

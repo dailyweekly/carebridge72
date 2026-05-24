@@ -40,6 +40,7 @@ export function getServiceHealth(env: Record<string, string | undefined> = proce
     routes: [
       "/",
       "/readiness",
+      "/status",
       "/workspace",
       "/capture",
       "/api/risk",
