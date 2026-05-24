@@ -3,9 +3,11 @@
 import {
   ArrowRight,
   Bot,
+  Building2,
   CheckCircle2,
   ClipboardCheck,
   Copy,
+  Database,
   DatabaseZap,
   FileText,
   Languages,
@@ -22,7 +24,9 @@ import { assessCaseReview } from "@/lib/case-review";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
+import type { HospitalReference } from "@/lib/hira-hospital";
 import type { CareResource, Language, Patient, ResourceMatch } from "@/lib/types";
+import type { IntegrationStatus } from "@/lib/data-integrations";
 import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
 
 type WorkspaceClientProps = {
@@ -32,6 +36,11 @@ type WorkspaceClientProps = {
 
 type DraftState = Record<DraftKind, DraftResponse | null>;
 type ResourceStatus = "loading" | "live" | "fallback";
+type HospitalStatus = "loading" | "live" | "empty";
+type IntegrationSummary = {
+  generatedAt: string;
+  integrations: IntegrationStatus[];
+};
 const workspaceAccessCode = "7272";
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
@@ -46,6 +55,9 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
   const [drafts, setDrafts] = useState<DraftState>({ handoff: null, family: null });
   const [liveResourceMatch, setLiveResourceMatch] = useState<(ResourceMatch & { patientId: string }) | null>(null);
   const [resourceStatus, setResourceStatus] = useState<ResourceStatus>("loading");
+  const [hospitalReferences, setHospitalReferences] = useState<HospitalReference[]>([]);
+  const [hospitalStatus, setHospitalStatus] = useState<HospitalStatus>("loading");
+  const [integrationSummary, setIntegrationSummary] = useState<IntegrationSummary | null>(null);
   const [error, setError] = useState("");
 
   const risk = useMemo(() => calculateRisk(patient), [patient]);
@@ -99,6 +111,61 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
       cancelled = true;
     };
   }, [accessGranted, patient]);
+
+  useEffect(() => {
+    if (!accessGranted) return;
+
+    let cancelled = false;
+    const patientSnapshot = patient;
+
+    async function loadHospitalReferences() {
+      try {
+        const response = await fetch("/api/hospitals", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ patient: patientSnapshot })
+        });
+        if (!response.ok) throw new Error(`hospitals request failed: ${response.status}`);
+        const result = (await response.json()) as { source: "hira-live" | "empty"; references: HospitalReference[] };
+        if (cancelled) return;
+        setHospitalReferences(result.references);
+        setHospitalStatus(result.source === "hira-live" ? "live" : "empty");
+      } catch {
+        if (cancelled) return;
+        setHospitalReferences([]);
+        setHospitalStatus("empty");
+      }
+    }
+
+    void loadHospitalReferences();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessGranted, patient]);
+
+  useEffect(() => {
+    if (!accessGranted) return;
+
+    let cancelled = false;
+
+    async function loadIntegrationSummary() {
+      try {
+        const response = await fetch("/api/integrations/status");
+        if (!response.ok) throw new Error(`integrations request failed: ${response.status}`);
+        const result = (await response.json()) as IntegrationSummary;
+        if (!cancelled) setIntegrationSummary(result);
+      } catch {
+        if (!cancelled) setIntegrationSummary(null);
+      }
+    }
+
+    void loadIntegrationSummary();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessGranted]);
 
   if (!accessGranted) {
     return (
@@ -188,10 +255,11 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-4">
+        <div className="mt-5 grid gap-3 md:grid-cols-5">
           <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
           <SummaryTile label="검토 시간" value={`${signal.windowStatus} · ${signal.elapsedHours}h`} />
           <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} hint={resourceSourceLabel} />
+          <SummaryTile label="병원 기준정보" value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`} hint={hospitalStatus === "live" ? "HIRA live" : "기준정보 없음"} />
           <SummaryTile label="초안 상태" value={`${activeDraftCount}/2 생성`} />
         </div>
       </section>
@@ -212,6 +280,8 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
                 setDrafts({ handoff: null, family: null });
                 setLiveResourceMatch(null);
                 setResourceStatus("loading");
+                setHospitalReferences([]);
+                setHospitalStatus("loading");
               }}
               onPrivacyBlocked={setError}
               foreignLanguage={foreignLanguage}
@@ -254,6 +324,8 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               rationale={resourceMatch.rationale}
             />
           </div>
+          <HospitalReferencePanel status={hospitalStatus} references={hospitalReferences} />
+          <IntegrationStatusPanel summary={integrationSummary} />
 
           <section id="draft-work" className="rounded-md border border-line bg-white p-4 shadow-soft">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -334,6 +406,95 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
     }
     setAccessGranted(true);
   }
+}
+
+function HospitalReferencePanel({ status, references }: { status: HospitalStatus; references: HospitalReference[] }) {
+  return (
+    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Building2 className="text-teal" size={20} />
+            <h2 className="text-lg font-bold text-ink">병원 사회사업실 기준정보</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            HIRA 병원정보서비스를 조회해 병원 내 담당자가 확인할 수 있는 지역 기준정보만 표시합니다.
+          </p>
+        </div>
+        <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-semibold text-slate-700">
+          {status === "loading" ? "조회 중" : status === "live" ? `HIRA live · ${references.length}건` : "표시할 기준정보 없음"}
+        </span>
+      </div>
+
+      {references.length > 0 ? (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {references.slice(0, 4).map((reference) => (
+            <article key={reference.id} className="rounded-md border border-line bg-panel p-3">
+              <div className="mb-2 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-teal">{reference.className}</p>
+                  <h3 className="mt-1 font-bold text-ink">{reference.name}</h3>
+                </div>
+                <span className="shrink-0 rounded bg-white px-2 py-1 text-xs font-bold text-slate-600">
+                  {reference.district}
+                </span>
+              </div>
+              <p className="text-sm leading-6 text-slate-700">{reference.addressSummary}</p>
+              <p className="mt-2 rounded bg-white p-2 text-xs leading-5 text-slate-600">{reference.useLimit}</p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-md border border-dashed border-line bg-panel p-4 text-sm leading-6 text-slate-600">
+          {status === "loading"
+            ? "외부 병원정보서비스 응답을 기다리고 있습니다."
+            : "외부 API 지연 또는 지역 결과 없음으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다."}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function IntegrationStatusPanel({ summary }: { summary: IntegrationSummary | null }) {
+  const visibleIntegrations = summary?.integrations.filter((item) => item.priority !== "P3").slice(0, 5) ?? [];
+  const configuredCount = visibleIntegrations.filter((item) => item.stage === "configured").length;
+
+  return (
+    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Database className="text-teal" size={20} />
+            <h2 className="text-lg font-bold text-ink">실데이터 연동 상태</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            운영 환경변수 구성 여부만 표시하며 키 값은 화면이나 API 응답에 노출하지 않습니다.
+          </p>
+        </div>
+        <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-semibold text-slate-700">
+          {summary ? `${configuredCount}/${visibleIntegrations.length} 구성` : "상태 확인 중"}
+        </span>
+      </div>
+
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+        {visibleIntegrations.map((item) => (
+          <article key={item.id} className="rounded-md border border-line bg-panel p-3">
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <p className="font-bold text-ink">{item.name}</p>
+              <span className={`shrink-0 rounded px-2 py-1 text-xs font-black ${item.stage === "configured" ? "bg-teal text-white" : "bg-white text-slate-600"}`}>
+                {item.stage === "configured" ? "구성됨" : "대기"}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-slate-500">{item.provider}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">{item.purpose}</p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              확인 항목: {item.configuredKeys.length > 0 ? item.configuredKeys.join(", ") : item.missingKeys.join(", ")}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function ResourceSourceNotice({ status, source }: { status: ResourceStatus; source?: ResourceMatch["source"] }) {
