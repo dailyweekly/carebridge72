@@ -14,7 +14,7 @@
 | 4 | `captures/04-guide.png` | 가족 안내문, 다국어 안내, 운영 원칙 확인 | AI 활용 및 서비스 흐름 |
 | 5 | `captures/05-full.png` | 별첨5용 전체 요약 화면 | 별첨5 대표 이미지 |
 | 6 | `captures/06-workspace.png` | 접근 코드 후 AI 작업 화면, 인계 요약·가족 안내 초안 생성 흐름 | AI 플랫폼 증빙 |
-| 7 | `captures/07-hospital-reference.png` | HIRA 병원정보서비스 공공데이터 기준정보 반영 | 공공 API 연결성 증빙 |
+| 7 | `captures/07-hospital-reference.png` | HIRA 병원정보서비스 공공데이터 기준정보 반영 | 공공데이터 연결성 증빙 |
 | 8 | `captures/08-mobile.png` | 모바일 첫 화면 가독성과 반응형 구성 | 사용자 이용성 보강 |
 | 9 | `captures/09-status.png` | 배포·연동·운영 통제 상태 | 전문성·운영 준비도 |
 

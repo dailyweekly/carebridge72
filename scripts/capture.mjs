@@ -177,7 +177,7 @@ async function waitForWorkspaceData(page) {
       .first()
       .waitFor({ state: "visible", timeout: 20000 }),
     page
-      .locator("text=/공공데이터 반영|연결됨 · 지역 결과 없음|API 키 미설정|승인 또는 키 확인 필요|응답 지연/")
+      .locator("text=/공공데이터 반영|연결됨 · 지역 결과 없음|공공데이터 설정 필요|승인 또는 키 확인 필요|응답 지연/")
       .first()
       .waitFor({ state: "visible", timeout: 60000 })
   ]);
