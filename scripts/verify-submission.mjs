@@ -10,7 +10,8 @@ const commands = [
   ["run", "check:legal"],
   ["run", "build"],
   ["audit"],
-  ["run", "capture"]
+  ["run", "capture"],
+  ["run", "check:captures"]
 ];
 
 for (const args of commands) {
