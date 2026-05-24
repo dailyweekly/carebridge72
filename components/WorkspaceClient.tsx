@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Copy,
-  Database,
   DatabaseZap,
   FileText,
   Languages,
@@ -26,7 +25,6 @@ import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
 import type { HospitalReference } from "@/lib/hira-hospital";
 import type { CareResource, Language, Patient, ResourceMatch } from "@/lib/types";
-import type { IntegrationStatus } from "@/lib/data-integrations";
 import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
 
 type WorkspaceClientProps = {
@@ -37,10 +35,6 @@ type WorkspaceClientProps = {
 type DraftState = Record<DraftKind, DraftResponse | null>;
 type ResourceStatus = "loading" | "live" | "fallback";
 type HospitalStatus = "loading" | "live" | "empty";
-type IntegrationSummary = {
-  generatedAt: string;
-  integrations: IntegrationStatus[];
-};
 const workspaceAccessCode = "7272";
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
@@ -57,7 +51,6 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
   const [resourceStatus, setResourceStatus] = useState<ResourceStatus>("loading");
   const [hospitalReferences, setHospitalReferences] = useState<HospitalReference[]>([]);
   const [hospitalStatus, setHospitalStatus] = useState<HospitalStatus>("loading");
-  const [integrationSummary, setIntegrationSummary] = useState<IntegrationSummary | null>(null);
   const [error, setError] = useState("");
 
   const risk = useMemo(() => calculateRisk(patient), [patient]);
@@ -71,8 +64,8 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
     resourceStatus === "loading"
       ? "공공데이터 조회 중"
       : resourceMatch.source === "nhis-live-with-mock-fallback"
-        ? "NHIS 실시간 + mock 보강"
-        : "mock 후보";
+        ? "공공데이터 반영"
+        : "예비 후보";
   const guide = useMemo(
     () => generateFamilyGuide(patient, risk, resourceMatch.candidates, foreignLanguage),
     [foreignLanguage, patient, resourceMatch.candidates, risk]
@@ -143,29 +136,6 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
       cancelled = true;
     };
   }, [accessGranted, patient]);
-
-  useEffect(() => {
-    if (!accessGranted) return;
-
-    let cancelled = false;
-
-    async function loadIntegrationSummary() {
-      try {
-        const response = await fetch("/api/integrations/status");
-        if (!response.ok) throw new Error(`integrations request failed: ${response.status}`);
-        const result = (await response.json()) as IntegrationSummary;
-        if (!cancelled) setIntegrationSummary(result);
-      } catch {
-        if (!cancelled) setIntegrationSummary(null);
-      }
-    }
-
-    void loadIntegrationSummary();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [accessGranted]);
 
   if (!accessGranted) {
     return (
@@ -249,7 +219,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-line bg-panel px-3 py-2 text-sm font-bold text-slate-700 sm:col-span-2"
               href="/demo"
             >
-              전체 데모 화면
+              사례 검토 화면
               <ArrowRight size={16} />
             </a>
           </div>
@@ -259,7 +229,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
           <SummaryTile label="검토 시간" value={`${signal.windowStatus} · ${signal.elapsedHours}h`} />
           <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} hint={resourceSourceLabel} />
-          <SummaryTile label="병원 기준정보" value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`} hint={hospitalStatus === "live" ? "HIRA live" : "기준정보 없음"} />
+          <SummaryTile label="병원 기준정보" value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`} hint={hospitalStatus === "live" ? "공공데이터 반영" : "기준정보 없음"} />
           <SummaryTile label="초안 상태" value={`${activeDraftCount}/2 생성`} />
         </div>
       </section>
@@ -325,7 +295,6 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
             />
           </div>
           <HospitalReferencePanel status={hospitalStatus} references={hospitalReferences} />
-          <IntegrationStatusPanel summary={integrationSummary} />
 
           <section id="draft-work" className="rounded-md border border-line bg-white p-4 shadow-soft">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -422,7 +391,7 @@ function HospitalReferencePanel({ status, references }: { status: HospitalStatus
           </p>
         </div>
         <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-semibold text-slate-700">
-          {status === "loading" ? "조회 중" : status === "live" ? `HIRA live · ${references.length}건` : "표시할 기준정보 없음"}
+          {status === "loading" ? "조회 중" : status === "live" ? `공공데이터 반영 · ${references.length}건` : "표시할 기준정보 없음"}
         </span>
       </div>
 
@@ -455,48 +424,6 @@ function HospitalReferencePanel({ status, references }: { status: HospitalStatus
   );
 }
 
-function IntegrationStatusPanel({ summary }: { summary: IntegrationSummary | null }) {
-  const visibleIntegrations = summary?.integrations.filter((item) => item.priority !== "P3").slice(0, 5) ?? [];
-  const configuredCount = visibleIntegrations.filter((item) => item.stage === "configured").length;
-
-  return (
-    <section className="rounded-md border border-line bg-white p-4 shadow-soft">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Database className="text-teal" size={20} />
-            <h2 className="text-lg font-bold text-ink">실데이터 연동 상태</h2>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            운영 환경변수 구성 여부만 표시하며 키 값은 화면이나 API 응답에 노출하지 않습니다.
-          </p>
-        </div>
-        <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-semibold text-slate-700">
-          {summary ? `${configuredCount}/${visibleIntegrations.length} 구성` : "상태 확인 중"}
-        </span>
-      </div>
-
-      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-        {visibleIntegrations.map((item) => (
-          <article key={item.id} className="rounded-md border border-line bg-panel p-3">
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <p className="font-bold text-ink">{item.name}</p>
-              <span className={`shrink-0 rounded px-2 py-1 text-xs font-black ${item.stage === "configured" ? "bg-teal text-white" : "bg-white text-slate-600"}`}>
-                {item.stage === "configured" ? "구성됨" : "대기"}
-              </span>
-            </div>
-            <p className="text-xs font-semibold text-slate-500">{item.provider}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-700">{item.purpose}</p>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              확인 항목: {item.configuredKeys.length > 0 ? item.configuredKeys.join(", ") : item.missingKeys.join(", ")}
-            </p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function ResourceSourceNotice({ status, source }: { status: ResourceStatus; source?: ResourceMatch["source"] }) {
   const isLive = source === "nhis-live-with-mock-fallback" && status === "live";
   return (
@@ -512,13 +439,13 @@ function ResourceSourceNotice({ status, source }: { status: ResourceStatus; sour
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-600">
               {isLive
-                ? "국민건강보험공단 장기요양기관 검색 서비스 결과를 우선 반영하고, 부족한 카테고리는 mock 후보로 보강합니다."
+                ? "공공데이터 결과를 우선 반영하고, 부족한 항목은 예비 후보로 보강합니다."
                 : "외부 API 지연 또는 미응답 시 화면 흐름을 유지하기 위해 예비 후보를 표시합니다."}
             </p>
           </div>
         </div>
         <span className="rounded-md border border-line bg-panel px-2 py-1 text-xs font-bold text-slate-700">
-          {isLive ? "NHIS live" : status === "loading" ? "loading" : "mock fallback"}
+          {isLive ? "공공데이터 반영" : status === "loading" ? "조회 중" : "예비 데이터"}
         </span>
       </div>
     </div>

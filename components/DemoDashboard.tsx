@@ -10,7 +10,6 @@ import { CareCandidateList } from "./CareCandidateList";
 import { FamilyGuidePanel } from "./FamilyGuidePanel";
 import { EvidenceCaptureView } from "./EvidenceCaptureView";
 import { DemoFlow } from "./DemoFlow";
-import { SolutionOperations } from "./SolutionOperations";
 import { CaseDecisionPanel } from "./CaseDecisionPanel";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
@@ -20,20 +19,16 @@ import type {
   CandidateReviewStatus,
   CareResource,
   Language,
-  Patient,
-  PublicDataSource,
-  ReviewCase
+  Patient
 } from "@/lib/types";
 
 type DemoDashboardProps = {
   initialPatients: Patient[];
   resources: CareResource[];
-  sources: PublicDataSource[];
-  cases: ReviewCase[];
   captureMode: boolean;
 };
 
-export function DemoDashboard({ initialPatients, resources, sources, cases, captureMode }: DemoDashboardProps) {
+export function DemoDashboard({ initialPatients, resources, captureMode }: DemoDashboardProps) {
   const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
   const [patient, setPatient] = useState<Patient>(initial);
   const [foreignLanguage, setForeignLanguage] = useState<Exclude<Language, "ko">>(
@@ -70,7 +65,7 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
             <p className="mb-2 text-sm font-bold text-teal">CareBridge72</p>
             <h1 className="text-3xl font-black tracking-normal text-ink sm:text-4xl">퇴원 후 72시간 통합돌봄 워크스페이스</h1>
             <p className="mt-3 text-base leading-7 text-slate-700">
-              공공 담당자와 병원 사회사업실이 위험 신호, 지역 후보, 가족 안내 초안, 판단 기록을 한 흐름에서 처리하는 업무 제품입니다.
+              공공 담당자와 병원 사회사업실이 위험 신호, 지역 후보, 가족 안내문, 판단 기록을 한 흐름에서 처리하는 업무 화면입니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
               <StatusPill icon={<Activity size={15} />} text="가명 데이터" />
@@ -102,7 +97,7 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
               별첨 캡처 화면
             </a>
             <p className="text-xs leading-5 text-slate-500 sm:col-span-2 lg:col-span-1">
-              현재 화면은 전체 데모입니다. Claude 기반 초안 생성은 AI 작업 화면에서 실행합니다.
+              현재 화면은 사례 검토 흐름입니다. 문서 초안 생성은 접근 코드 확인 후 AI 작업 화면에서 실행합니다.
             </p>
           </div>
         </div>
@@ -162,17 +157,6 @@ export function DemoDashboard({ initialPatients, resources, sources, cases, capt
           koreanGuide={koreanGuide}
           foreignGuide={foreignGuide}
           compact={false}
-        />
-      ) : null}
-
-      {!captureMode ? (
-        <SolutionOperations
-          patients={initialPatients}
-          resources={resources}
-          cases={cases}
-          sources={sources}
-          activePatient={patient}
-          activeRisk={risk}
         />
       ) : null}
 

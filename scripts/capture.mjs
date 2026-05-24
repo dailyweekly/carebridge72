@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const captureDir = path.join(root, "captures");
-const host = "127.0.0.1";
+const host = "localhost";
 const port = 3101;
 const spawnedBaseUrl = `http://${host}:${port}`;
 const reusableBaseUrl = process.env.CAPTURE_BASE_URL;
@@ -15,8 +15,9 @@ const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 
 await fs.mkdir(captureDir, { recursive: true });
 
-const shouldReuseServer = reusableBaseUrl ? await isServerReady(`${reusableBaseUrl}/capture`, 2000) : false;
-const baseUrl = shouldReuseServer && reusableBaseUrl ? reusableBaseUrl : spawnedBaseUrl;
+const detectedBaseUrl = await findReusableBaseUrl(reusableBaseUrl);
+const shouldReuseServer = Boolean(detectedBaseUrl);
+const baseUrl = detectedBaseUrl ?? spawnedBaseUrl;
 const server = shouldReuseServer
   ? null
   : spawn(process.execPath, [nextBin, "dev", "--hostname", host, "--port", String(port)], {
@@ -27,7 +28,17 @@ const server = shouldReuseServer
 
 try {
   await waitForServer(`${baseUrl}/capture`, 30000);
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ headless: true });
+
+  const workspacePage = await browser.newPage({ viewport: { width: 1440, height: 1200 }, deviceScaleFactor: 1 });
+  await workspacePage.goto(`${baseUrl}/workspace`, { waitUntil: "networkidle" });
+  await enterWorkspace(workspacePage, workspaceAccessCode);
+  await hideDevChrome(workspacePage);
+  await workspacePage.screenshot({ path: path.join(captureDir, "06-workspace.png"), fullPage: false });
+  await workspacePage.locator("text=병원 사회사업실 기준정보").scrollIntoViewIfNeeded();
+  await workspacePage.screenshot({ path: path.join(captureDir, "07-hospital-reference.png"), fullPage: false });
+  await workspacePage.close();
+
   const page = await browser.newPage({ viewport: { width: 1440, height: 1200 }, deviceScaleFactor: 1 });
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
@@ -43,16 +54,6 @@ try {
   await page.goto(`${baseUrl}/capture`, { waitUntil: "networkidle" });
   await hideDevChrome(page);
   await page.screenshot({ path: path.join(captureDir, "05-full.png"), fullPage: true });
-
-  await page.goto(`${baseUrl}/workspace`, { waitUntil: "networkidle" });
-  await hideDevChrome(page);
-  await page.fill("input[type='password']", workspaceAccessCode);
-  await page.click("button:has-text('입장')");
-  await page.waitForTimeout(7000);
-  await page.screenshot({ path: path.join(captureDir, "06-workspace.png"), fullPage: false });
-  await page.locator("text=병원 사회사업실 기준정보").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: path.join(captureDir, "07-data-panels.png"), fullPage: false });
-
   await browser.close();
   console.log("Capture files written to captures/.");
 } finally {
@@ -63,6 +64,30 @@ async function isServerReady(url, timeoutMs) {
   try {
     await waitForServer(url, timeoutMs);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+async function findReusableBaseUrl(explicitBaseUrl) {
+  if (explicitBaseUrl && (await isServerReady(`${explicitBaseUrl}/capture`, 2000))) {
+    return explicitBaseUrl;
+  }
+
+  for (const candidate of [`http://${host}:3108`, `http://${host}:3000`]) {
+    if (await isCareBridgeServer(candidate)) return candidate;
+  }
+
+  return null;
+}
+
+async function isCareBridgeServer(baseUrl) {
+  try {
+    const response = await fetch(baseUrl);
+    if (!response.ok) return false;
+    const text = await response.text();
+    if (!text.includes("CareBridge72")) return false;
+    return isServerReady(`${baseUrl}/capture`, 2000);
   } catch {
     return false;
   }
@@ -91,4 +116,23 @@ async function hideDevChrome(page) {
   await page.addStyleTag({
     content: "nextjs-portal, [data-nextjs-toast], [data-nextjs-dialog-overlay] { display: none !important; }"
   });
+}
+
+async function enterWorkspace(page, accessCode) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.waitForSelector("input[type='password']", { state: "visible" });
+    await page.click("input[type='password']");
+    await page.keyboard.type(accessCode);
+    await page.click("button:has-text('입장')");
+
+    try {
+      await page.locator("h1:has-text('담당자 인계와 가족 안내 초안')").waitFor({ state: "visible", timeout: 10000 });
+      await page.waitForTimeout(5000);
+      return;
+    } catch {
+      if (attempt === 2) throw new Error("Workspace access did not complete.");
+      await page.reload({ waitUntil: "networkidle" });
+      await hideDevChrome(page);
+    }
+  }
 }
