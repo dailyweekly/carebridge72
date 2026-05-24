@@ -45,7 +45,7 @@ npm run capture
 
 Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, 예비 JSON 데이터, 공공데이터포털 공개 API, Claude Messages API. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다. `/workspace`는 Claude Messages API 연동 준비가 된 LLM 문서화 보조 화면이며, 기본값은 `claude-haiku-4-5-20251001`입니다. `ANTHROPIC_API_KEY`가 없으면 동일 입력 기반 예비 초안을 생성합니다.
 
-실데이터 연동:
+공개 API 연동:
 
 - `/api/resources`: 국민건강보험공단 장기요양기관 검색 서비스 결과를 우선 반영하고 부족한 카테고리는 예비 후보로 보강합니다.
 - `/api/hospitals`: 건강보험심사평가원 병원정보서비스에서 병원명, 종별, 시군구, 주소 요약만 기준정보로 표시합니다.

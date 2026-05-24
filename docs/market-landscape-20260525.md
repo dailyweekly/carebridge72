@@ -13,7 +13,7 @@
 | 해외 퇴원 조정 AI | Caremaze | EMR 기반 discharge task, care team ownership, routine outreach AI | 한국 통합돌봄·HIRA/NHIS 데이터·직접 연결 제한 구조가 아님 |
 | 해외 post-acute referral | Repisodic, WellSky CarePort, Aidin | post-acute provider option, referral, authorization, EHR 연동 | 미국 referral/보험/환자 선택 규정 중심이며 국내 공공 담당자 업무와 다름 |
 | 환자·가족용 사후관리 | e-Cuido, AlivePost, Aescia Health | 퇴원 후 체크인, home risk, readmission monitoring | 담당자 내부 판단·문서화 화면이 아니라 환자/가족 engagement 성격 |
-| 국내 공공 제도·검색 | 보건복지부 통합돌봄, NHIS 퇴원환자 지원제도, HIRA 병원정보서비스 | 제도, 기관 기준정보, 병원/요양기관 검색 | 위험 신호 산정, 후보 비교, 안내문, 인계 기록을 통합한 업무 SaaS는 아님 |
+| 국내 공공 제도·검색 | 보건복지부 통합돌봄, NHIS 퇴원환자 지원제도, HIRA 병원정보서비스 | 제도, 기관 기준정보, 병원/요양기관 검색 | 위험 신호 산정, 후보 비교, 안내문, 인계 기록을 통합한 담당자용 업무 화면은 아님 |
 | 국내 돌봄 정보 플랫폼 | 가족용 요양·돌봄 검색/상담형 서비스 | 가족 대상 요양기관·요양등급 안내 | B2C 정보 탐색에 가까우며 공공 담당자 workflow가 아님 |
 
 ## 주요 근거
@@ -32,7 +32,7 @@ WellSky CarePort와 Aidin은 hospital-to-post-acute transition, referral managem
 
 ## 제품 포지셔닝
 
-케어브릿지72는 "한국형 퇴원 후 72시간 통합돌봄 담당자 보조 SaaS"로 포지셔닝한다.
+케어브릿지72는 "한국형 퇴원 후 72시간 통합돌봄 담당자 보조 서비스"로 포지셔닝한다.
 
 핵심 구매자:
 
@@ -54,7 +54,7 @@ WellSky CarePort와 Aidin은 hospital-to-post-acute transition, referral managem
 
 1. 도입 검토 화면에 시장 차별점 3개를 명확히 표시한다.
 2. README에 경쟁 검토 문서 링크를 추가해 평가자가 시장 이해를 바로 확인할 수 있게 한다.
-3. 신청서 문구는 "추천 플랫폼"이 아니라 "담당자 검토 보조 SaaS"로 통일한다.
+3. 신청서 문구는 "추천 플랫폼"이 아니라 "담당자 검토 보조 서비스"로 통일한다.
 4. 향후 실증 단계에서는 통합돌봄 담당자 3-5명의 업무 시간 단축, 문서화 누락 감소, 후보 검토 일관성 향상을 검증한다.
 
 ## 참고 URL

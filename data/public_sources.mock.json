@@ -3,7 +3,7 @@
     "id": "SRC-HIRA-OPEN",
     "name": "HIRA 보건의료빅데이터개방시스템",
     "provider": "건강보험심사평가원",
-    "use": "진단군별 재입원 패턴, 동반질환 군집, 약물 부작용 패턴의 정식 분석 신청 대상",
+    "use": "진단군별 재입원 패턴, 동반질환 군집, 처방 정보 기반 위험 신호의 정식 분석 신청 대상",
     "status": "FORMAL_REQUEST",
     "updateCycle": "정식 신청·심의 후 분석",
     "url": "https://opendata.hira.or.kr"
