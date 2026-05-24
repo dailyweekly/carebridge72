@@ -1,11 +1,16 @@
 import { regionLabels } from "./labels";
-import { fetchTextWithTimeout, getCached, setCached } from "./server-cache";
+import { getCached, setCached } from "./server-cache";
 import type { Patient } from "./types";
 
 type FetchLike = typeof fetch;
 const cacheTtlMs = 30 * 60 * 1000;
 const requestTimeoutMs = 5000;
-export type HiraHospitalSource = "hira-live" | "hira-live-empty" | "unconfigured" | "request-failed";
+export type HiraHospitalSource =
+  | "hira-live"
+  | "hira-live-empty"
+  | "unconfigured"
+  | "authorization-failed"
+  | "request-failed";
 
 export type HospitalReference = {
   id: string;
@@ -21,6 +26,7 @@ export type HospitalReference = {
 export type HiraHospitalLookup = {
   source: HiraHospitalSource;
   references: HospitalReference[];
+  statusCode?: number;
 };
 
 const defaultEndpoint = "https://apis.data.go.kr/B551182/hospInfoServicev2/getHospBasisList";
@@ -44,18 +50,26 @@ export async function fetchHiraHospitalLookup(
   const endpoint = env.HIRA_HOSP_API_URL || defaultEndpoint;
   const fetcher = options.fetcher;
   const url = new URL(endpoint);
-  url.searchParams.set("serviceKey", serviceKey);
+  url.searchParams.set("ServiceKey", serviceKey);
   url.searchParams.set("pageNo", "1");
   url.searchParams.set("numOfRows", "100");
   url.searchParams.set("sidoCd", "310000");
 
   try {
-    const xml = await fetchXml(url, fetcher);
-    if (!xml) return { source: "request-failed", references: [] };
+    const result = await fetchXml(url, fetcher);
+    if (!result.ok) {
+      return {
+        source: result.statusCode === 401 || result.statusCode === 403 ? "authorization-failed" : "request-failed",
+        references: [],
+        statusCode: result.statusCode
+      };
+    }
+    const xml = result.text;
     const references = parseHiraHospitalXml(xml, patient.region);
     return {
       source: references.length > 0 ? "hira-live" : "hira-live-empty",
-      references
+      references,
+      statusCode: result.statusCode
     };
   } catch {
     return { source: "request-failed", references: [] };
@@ -65,17 +79,41 @@ export async function fetchHiraHospitalLookup(
 async function fetchXml(url: URL, fetcher?: FetchLike) {
   if (fetcher) {
     const response = await fetcher(url);
-    if (!response.ok) return "";
-    return response.text();
+    return {
+      ok: response.ok,
+      statusCode: response.status,
+      text: response.ok ? await response.text() : ""
+    };
   }
 
   const cacheKey = `hira-hospital:${url.toString()}`;
-  const cached = getCached<string>(cacheKey);
+  const cached = getCached<{ ok: boolean; statusCode: number; text: string }>(cacheKey);
   if (cached !== null) return cached;
 
-  const xml = await fetchTextWithTimeout(url, requestTimeoutMs);
-  if (xml) setCached(cacheKey, xml, cacheTtlMs);
-  return xml;
+  const result = await fetchText(url, requestTimeoutMs);
+  if (result.ok && result.text) setCached(cacheKey, result, cacheTtlMs);
+  return result;
+}
+
+async function fetchText(url: URL, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return {
+      ok: response.ok,
+      statusCode: response.status,
+      text: response.ok ? await response.text() : ""
+    };
+  } catch {
+    return {
+      ok: false,
+      statusCode: 0,
+      text: ""
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export function parseHiraHospitalXml(xml: string, region: Patient["region"]): HospitalReference[] {

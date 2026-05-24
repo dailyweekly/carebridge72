@@ -68,4 +68,26 @@ describe("HIRA hospital info integration", () => {
     expect(live.source).toBe("hira-live");
     expect(live.references).toHaveLength(1);
   });
+
+  it("reports authorization failures separately from network failures", async () => {
+    const unauthorized = await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      {
+        env: { DATA_GO_KR_SERVICE_KEY: "bad-key" },
+        fetcher: (() => Promise.resolve(new Response("Unauthorized", { status: 401 }))) as typeof fetch
+      }
+    );
+    const networkFailed = await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      {
+        env: { DATA_GO_KR_SERVICE_KEY: "key" },
+        fetcher: (() => Promise.resolve(new Response("Gateway timeout", { status: 504 }))) as typeof fetch
+      }
+    );
+
+    expect(unauthorized.source).toBe("authorization-failed");
+    expect(unauthorized.statusCode).toBe(401);
+    expect(networkFailed.source).toBe("request-failed");
+    expect(networkFailed.statusCode).toBe(504);
+  });
 });

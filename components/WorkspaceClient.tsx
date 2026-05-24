@@ -452,6 +452,7 @@ function getHospitalStatusText(status: HospitalStatus) {
   if (status === "hira-live") return "공공데이터 반영";
   if (status === "hira-live-empty") return "연결됨 · 지역 결과 없음";
   if (status === "unconfigured") return "API 키 미설정";
+  if (status === "authorization-failed") return "승인 또는 키 확인 필요";
   return "응답 지연";
 }
 
@@ -462,6 +463,9 @@ function getHospitalEmptyText(status: HospitalStatus) {
   }
   if (status === "unconfigured") {
     return "HIRA 병원정보서비스 API 키가 없어 병원 기준정보를 표시하지 않습니다. Vercel 환경변수 DATA_GO_KR_SERVICE_KEY를 설정하면 조회됩니다.";
+  }
+  if (status === "authorization-failed") {
+    return "HIRA 병원정보서비스가 인증을 거부했습니다. 공공데이터포털에서 병원정보서비스 활용신청 승인 상태와 Vercel의 DATA_GO_KR_SERVICE_KEY 값을 확인해야 합니다.";
   }
   return "공공데이터 응답 지연으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다.";
 }
