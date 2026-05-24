@@ -238,6 +238,13 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           />
           <SummaryTile label="초안 상태" value={`${activeDraftCount}/2 생성`} />
         </div>
+        <WorkspaceActionGuide
+          hasHandoff={Boolean(drafts.handoff)}
+          hasFamily={Boolean(drafts.family)}
+          pendingKind={pendingKind}
+          candidateCount={resourceMatch.candidates.length}
+          onDraftRequest={requestDraft}
+        />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -400,6 +407,76 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
       setAccessPending(false);
     }
   }
+}
+
+function WorkspaceActionGuide({
+  hasHandoff,
+  hasFamily,
+  pendingKind,
+  candidateCount,
+  onDraftRequest
+}: {
+  hasHandoff: boolean;
+  hasFamily: boolean;
+  pendingKind: DraftKind | null;
+  candidateCount: number;
+  onDraftRequest: (kind: DraftKind) => void;
+}) {
+  const nextCopy = !hasHandoff
+    ? "먼저 담당자 인계 요약을 만들면 병원·시군 간 전달 문장을 빠르게 정리할 수 있습니다."
+    : !hasFamily
+      ? "인계 요약이 준비되었습니다. 필요하면 가족에게 전달할 안내 초안을 이어서 만드세요."
+      : "두 가지 초안이 준비되었습니다. 문구를 검토한 뒤 복사해서 기관 양식에 맞춰 정리하세요.";
+  const steps = [
+    { label: "후보 확인", detail: `${candidateCount}건 확인`, done: candidateCount > 0 },
+    { label: "인계 요약", detail: hasHandoff ? "생성 완료" : "먼저 생성 권장", done: hasHandoff },
+    { label: "가족 안내", detail: hasFamily ? "생성 완료" : "필요 시 생성", done: hasFamily }
+  ];
+
+  return (
+    <section className="mt-4 rounded-md border border-line bg-panel p-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <ClipboardCheck className="text-teal" size={18} />
+            <h2 className="font-black text-ink">이번 화면에서 할 일</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{nextCopy}</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-black text-white disabled:opacity-60"
+            type="button"
+            disabled={Boolean(pendingKind)}
+            onClick={() => onDraftRequest("handoff")}
+          >
+            {pendingKind === "handoff" ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+            인계 요약
+          </button>
+          <button
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-teal bg-white px-3 py-2 text-sm font-black text-teal disabled:opacity-60"
+            type="button"
+            disabled={Boolean(pendingKind)}
+            onClick={() => onDraftRequest("family")}
+          >
+            {pendingKind === "family" ? <Loader2 size={16} className="animate-spin" /> : <Languages size={16} />}
+            가족 안내
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        {steps.map((step) => (
+          <div key={step.label} className="rounded-md border border-line bg-white p-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className={step.done ? "text-teal" : "text-slate-300"} />
+              <p className="text-sm font-black text-ink">{step.label}</p>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{step.detail}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function HospitalReferencePanel({ status, references }: { status: HospitalStatus; references: HospitalReference[] }) {
