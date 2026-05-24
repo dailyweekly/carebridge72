@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { readJsonObject, requireRecord } from "@/lib/api-route";
-import { fetchHiraHospitalReferences } from "@/lib/hira-hospital";
+import { fetchHiraHospitalLookup } from "@/lib/hira-hospital";
 import type { Patient } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -10,9 +10,6 @@ export async function POST(request: Request) {
   const patient = requireRecord(parsed.body, "patient");
   if (!patient.ok) return patient.response;
 
-  const references = await fetchHiraHospitalReferences(patient.value as Pick<Patient, "region">);
-  return NextResponse.json({
-    source: references.length > 0 ? "hira-live" : "empty",
-    references
-  });
+  const lookup = await fetchHiraHospitalLookup(patient.value as Pick<Patient, "region">);
+  return NextResponse.json(lookup);
 }

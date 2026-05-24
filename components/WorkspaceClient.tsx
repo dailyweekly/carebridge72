@@ -23,7 +23,7 @@ import { assessCaseReview } from "@/lib/case-review";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
-import type { HospitalReference } from "@/lib/hira-hospital";
+import type { HiraHospitalSource, HospitalReference } from "@/lib/hira-hospital";
 import type { CareResource, Language, Patient, ResourceMatch } from "@/lib/types";
 import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
 
@@ -34,7 +34,7 @@ type WorkspaceClientProps = {
 
 type DraftState = Record<DraftKind, DraftResponse | null>;
 type ResourceStatus = "loading" | "live" | "fallback";
-type HospitalStatus = "loading" | "live" | "empty";
+type HospitalStatus = "loading" | HiraHospitalSource;
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
   const initial = initialPatients.find((patient) => patient.id === "P003") ?? initialPatients[0];
@@ -119,14 +119,14 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           body: JSON.stringify({ patient: patientSnapshot })
         });
         if (!response.ok) throw new Error(`hospitals request failed: ${response.status}`);
-        const result = (await response.json()) as { source: "hira-live" | "empty"; references: HospitalReference[] };
+        const result = (await response.json()) as { source: HiraHospitalSource; references: HospitalReference[] };
         if (cancelled) return;
         setHospitalReferences(result.references);
-        setHospitalStatus(result.source === "hira-live" ? "live" : "empty");
+        setHospitalStatus(result.source);
       } catch {
         if (cancelled) return;
         setHospitalReferences([]);
-        setHospitalStatus("empty");
+        setHospitalStatus("request-failed");
       }
     }
 
@@ -231,7 +231,11 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
           <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
           <SummaryTile label="검토 시간" value={`${signal.windowStatus} · ${signal.elapsedHours}h`} />
           <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} hint={resourceSourceLabel} />
-          <SummaryTile label="병원 기준정보" value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`} hint={hospitalStatus === "live" ? "공공데이터 반영" : "기준정보 없음"} />
+          <SummaryTile
+            label="병원 기준정보"
+            value={hospitalStatus === "loading" ? "조회 중" : `${hospitalReferences.length}건`}
+            hint={getHospitalStatusText(hospitalStatus)}
+          />
           <SummaryTile label="초안 상태" value={`${activeDraftCount}/2 생성`} />
         </div>
       </section>
@@ -412,7 +416,7 @@ function HospitalReferencePanel({ status, references }: { status: HospitalStatus
           </p>
         </div>
         <span className="rounded-md border border-line bg-panel px-3 py-1 text-sm font-semibold text-slate-700">
-          {status === "loading" ? "조회 중" : status === "live" ? `공공데이터 반영 · ${references.length}건` : "표시할 기준정보 없음"}
+          {status === "loading" ? "조회 중" : getHospitalStatusText(status)}
         </span>
       </div>
 
@@ -436,13 +440,30 @@ function HospitalReferencePanel({ status, references }: { status: HospitalStatus
         </div>
       ) : (
         <div className="rounded-md border border-dashed border-line bg-panel p-4 text-sm leading-6 text-slate-600">
-          {status === "loading"
-            ? "외부 병원정보서비스 응답을 기다리고 있습니다."
-            : "공공데이터 응답 지연 또는 지역 결과 없음으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다."}
+          {getHospitalEmptyText(status)}
         </div>
       )}
     </section>
   );
+}
+
+function getHospitalStatusText(status: HospitalStatus) {
+  if (status === "loading") return "조회 중";
+  if (status === "hira-live") return "공공데이터 반영";
+  if (status === "hira-live-empty") return "연결됨 · 지역 결과 없음";
+  if (status === "unconfigured") return "API 키 미설정";
+  return "응답 지연";
+}
+
+function getHospitalEmptyText(status: HospitalStatus) {
+  if (status === "loading") return "외부 병원정보서비스 응답을 기다리고 있습니다.";
+  if (status === "hira-live-empty") {
+    return "HIRA 병원정보서비스는 연결되었지만 현재 지역 조건에 표시할 기준정보가 없습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다.";
+  }
+  if (status === "unconfigured") {
+    return "HIRA 병원정보서비스 API 키가 없어 병원 기준정보를 표시하지 않습니다. Vercel 환경변수 DATA_GO_KR_SERVICE_KEY를 설정하면 조회됩니다.";
+  }
+  return "공공데이터 응답 지연으로 기준정보를 표시하지 않습니다. 돌봄 후보 검토와 AI 초안 생성은 계속 진행할 수 있습니다.";
 }
 
 function ResourceSourceNotice({ status, source }: { status: ResourceStatus; source?: ResourceMatch["source"] }) {

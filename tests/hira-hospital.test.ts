@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fetchHiraHospitalReferences, parseHiraHospitalXml } from "@/lib/hira-hospital";
+import { fetchHiraHospitalLookup, fetchHiraHospitalReferences, parseHiraHospitalXml } from "@/lib/hira-hospital";
 
 describe("HIRA hospital info integration", () => {
   it("normalizes HIRA hospital XML for reference use only", () => {
@@ -31,5 +31,41 @@ describe("HIRA hospital info integration", () => {
     );
 
     expect(references).toEqual([]);
+  });
+
+  it("distinguishes unconfigured, connected-empty, and live HIRA states", async () => {
+    const unconfigured = await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      { env: {}, fetcher: (() => Promise.reject(new Error("should not call"))) as typeof fetch }
+    );
+    const connectedEmpty = await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      {
+        env: { DATA_GO_KR_SERVICE_KEY: "key" },
+        fetcher: (() => Promise.resolve(new Response("<response><body><items /></body></response>"))) as typeof fetch
+      }
+    );
+    const live = await fetchHiraHospitalLookup(
+      { region: "GG-SUWON" },
+      {
+        env: { DATA_GO_KR_SERVICE_KEY: "key" },
+        fetcher: (() =>
+          Promise.resolve(
+            new Response(`
+              <response><body><items><item>
+                <addr>경기도 수원시 팔달구 중부대로 93</addr>
+                <clCdNm>상급종합</clCdNm>
+                <sgguCdNm>수원팔달구</sgguCdNm>
+                <yadmNm>테스트병원</yadmNm>
+              </item></items></body></response>
+            `)
+          )) as typeof fetch
+      }
+    );
+
+    expect(unconfigured.source).toBe("unconfigured");
+    expect(connectedEmpty.source).toBe("hira-live-empty");
+    expect(live.source).toBe("hira-live");
+    expect(live.references).toHaveLength(1);
   });
 });

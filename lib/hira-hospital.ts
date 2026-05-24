@@ -5,6 +5,7 @@ import type { Patient } from "./types";
 type FetchLike = typeof fetch;
 const cacheTtlMs = 30 * 60 * 1000;
 const requestTimeoutMs = 5000;
+export type HiraHospitalSource = "hira-live" | "hira-live-empty" | "unconfigured" | "request-failed";
 
 export type HospitalReference = {
   id: string;
@@ -17,15 +18,28 @@ export type HospitalReference = {
   useLimit: string;
 };
 
+export type HiraHospitalLookup = {
+  source: HiraHospitalSource;
+  references: HospitalReference[];
+};
+
 const defaultEndpoint = "https://apis.data.go.kr/B551182/hospInfoServicev2/getHospBasisList";
 
 export async function fetchHiraHospitalReferences(
   patient: Pick<Patient, "region">,
   options: { env?: Record<string, string | undefined>; fetcher?: FetchLike } = {}
 ): Promise<HospitalReference[]> {
+  const lookup = await fetchHiraHospitalLookup(patient, options);
+  return lookup.references;
+}
+
+export async function fetchHiraHospitalLookup(
+  patient: Pick<Patient, "region">,
+  options: { env?: Record<string, string | undefined>; fetcher?: FetchLike } = {}
+): Promise<HiraHospitalLookup> {
   const env = options.env ?? process.env;
   const serviceKey = env.DATA_GO_KR_SERVICE_KEY;
-  if (!serviceKey) return [];
+  if (!serviceKey) return { source: "unconfigured", references: [] };
 
   const endpoint = env.HIRA_HOSP_API_URL || defaultEndpoint;
   const fetcher = options.fetcher;
@@ -37,9 +51,14 @@ export async function fetchHiraHospitalReferences(
 
   try {
     const xml = await fetchXml(url, fetcher);
-    return parseHiraHospitalXml(xml, patient.region);
+    if (!xml) return { source: "request-failed", references: [] };
+    const references = parseHiraHospitalXml(xml, patient.region);
+    return {
+      source: references.length > 0 ? "hira-live" : "hira-live-empty",
+      references
+    };
   } catch {
-    return [];
+    return { source: "request-failed", references: [] };
   }
 }
 
