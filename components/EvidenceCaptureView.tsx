@@ -1,6 +1,6 @@
 import { CalendarDays } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
-import { bandLabels, categoryLabels, comorbidityLabels, diagnosisLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
+import { bandLabels, categoryLabels, comorbidityLabels, diagnosisLabels, languageLabels, livingArrangementLabels, regionLabels } from "@/lib/labels";
 import { assessCaseReview } from "@/lib/case-review";
 import { submissionEvidence } from "@/lib/submission-evidence";
 import type { CareResource, FamilyGuide, Patient, RiskResult } from "@/lib/types";
@@ -61,7 +61,7 @@ export function EvidenceCaptureView({
           value={patient.comorbidities.map((item) => comorbidityLabels[item]).join(", ")}
         />
         <InfoCell label="돌봄자" value={patient.caregiverPresent ? "상주 돌봄자 있음" : "상주 돌봄자 없음"} />
-        <InfoCell label="선호 언어" value={patient.preferredLanguage} />
+        <InfoCell label="선호 언어" value={languageLabels[patient.preferredLanguage]} />
         <InfoCell label="비고" value={patient.notes || "없음"} />
       </div>
 

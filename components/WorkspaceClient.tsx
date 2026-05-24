@@ -260,6 +260,9 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               patients={initialPatients}
               onChange={(nextPatient) => {
                 setPatient(nextPatient);
+                if (nextPatient.preferredLanguage !== "ko") {
+                  setForeignLanguage(nextPatient.preferredLanguage);
+                }
                 setDrafts({ handoff: null, family: null });
                 setLiveResourceMatch(null);
                 setResourceStatus("loading");

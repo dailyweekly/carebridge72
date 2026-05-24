@@ -167,6 +167,9 @@ export function DemoDashboard({ initialPatients, resources, captureMode }: DemoD
               patients={initialPatients}
               onChange={(nextPatient) => {
                 setPatient(nextPatient);
+                if (nextPatient.preferredLanguage !== "ko") {
+                  setForeignLanguage(nextPatient.preferredLanguage);
+                }
                 setCandidateReviewState({});
                 appendLog("담당자 입력", `${nextPatient.id} 시연용 사례 입력값을 갱신했습니다.`);
               }}

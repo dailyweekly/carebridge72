@@ -42,6 +42,13 @@ export function PatientInputForm({
     onChange({ ...patient, [key]: value });
   }
 
+  function updatePreferredLanguage(language: Language) {
+    update("preferredLanguage", language);
+    if (language !== "ko") {
+      onForeignLanguageChange(language);
+    }
+  }
+
   function toggleComorbidity(item: Comorbidity) {
     const current = patient.comorbidities.includes("NONE") ? [] : patient.comorbidities;
     const next = current.includes(item)
@@ -193,7 +200,7 @@ export function PatientInputForm({
             <select
               className={fieldClass}
               value={patient.preferredLanguage}
-              onChange={(event) => update("preferredLanguage", event.target.value as Language)}
+              onChange={(event) => updatePreferredLanguage(event.target.value as Language)}
             >
               {(Object.keys(languageLabels) as Language[]).map((item) => (
                 <option key={item} value={item}>
