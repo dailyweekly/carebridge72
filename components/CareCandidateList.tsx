@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Stethoscope } from "lucide-react";
+import { CheckCircle2, MapPin, Stethoscope } from "lucide-react";
 import { CaptureCaption } from "./CaptureCaption";
 import { categoryLabels } from "@/lib/labels";
 import type { CandidateReviewStatus, CareResource } from "@/lib/types";
@@ -23,6 +23,13 @@ export function CareCandidateList({
 }: CareCandidateListProps) {
   const [reviewState, setReviewState] = useState<Record<string, CandidateReviewStatus>>({});
   const [excludeReasons, setExcludeReasons] = useState<Record<string, string>>({});
+  const reviewedCount = candidates.filter((candidate) => (reviewState[candidate.id] ?? "검토 대상") !== "검토 대상").length;
+  const holdCount = candidates.filter((candidate) => reviewState[candidate.id] === "보류").length;
+  const excludedCount = candidates.filter((candidate) => reviewState[candidate.id] === "제외").length;
+  const reviewSummary =
+    reviewedCount === 0
+      ? "후보별 검토 상태를 표시하면 담당자 판단 단계에서 바로 반영됩니다."
+      : `${reviewedCount}/${candidates.length}건 검토 표시됨 · 보류 ${holdCount}건 · 제외 ${excludedCount}건`;
 
   return (
     <section id="candidates" className="scroll-mt-20 rounded-md border border-line bg-white p-4 shadow-soft">
@@ -49,6 +56,27 @@ export function CareCandidateList({
         <ReviewCriterion label="지역 일치" text="거주 시군 기준으로 후보를 좁힙니다." />
         <ReviewCriterion label="카테고리 다양성" text="방문·식사·이동 등 공백 유형을 나눠 봅니다." />
         <ReviewCriterion label="담당자 판단" text="후보는 비교 자료이며 직접 연결하지 않습니다." />
+      </div>
+
+      <div className="mb-4 rounded-md border border-line bg-panel p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 size={18} className={reviewedCount > 0 ? "mt-0.5 text-teal" : "mt-0.5 text-slate-300"} />
+            <div>
+              <p className="text-sm font-black text-ink">후보 검토 진행</p>
+              <p className="mt-1 text-xs leading-5 text-slate-600">{reviewSummary}</p>
+            </div>
+          </div>
+          <span className="rounded-md border border-line bg-white px-3 py-1 text-sm font-black text-ink">
+            {reviewedCount}/{candidates.length}
+          </span>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+          <div
+            className="h-full rounded-full bg-teal transition-all"
+            style={{ width: `${candidates.length > 0 ? (reviewedCount / candidates.length) * 100 : 0}%` }}
+          />
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
