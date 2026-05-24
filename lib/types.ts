@@ -65,6 +65,7 @@ export type CareResource = {
 export type ResourceMatch = {
   candidates: CareResource[];
   rationale: string;
+  source?: "mock" | "nhis-live-with-mock-fallback";
 };
 
 export type CandidateReviewStatus = "검토 대상" | "보류" | "제외";

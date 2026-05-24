@@ -1,7 +1,10 @@
 import { categoryLabels, regionLabels } from "./labels";
+import { fetchTextWithTimeout, getCached, setCached } from "./server-cache";
 import type { CareResource, Patient } from "./types";
 
 type FetchLike = typeof fetch;
+const cacheTtlMs = 10 * 60 * 1000;
+const requestTimeoutMs = 4000;
 
 const defaultEndpoint = "https://apis.data.go.kr/B550928/searchLtcInsttService02/getLtcInsttSeachList02";
 
@@ -21,7 +24,7 @@ export async function fetchNhisLongTermCareResources(
   if (!serviceKey) return [];
 
   const endpoint = env.NHIS_LTC_API_URL || defaultEndpoint;
-  const fetcher = options.fetcher ?? fetch;
+  const fetcher = options.fetcher;
 
   try {
     const responses = await Promise.all(
@@ -32,15 +35,29 @@ export async function fetchNhisLongTermCareResources(
         url.searchParams.set("numOfRows", "15");
         url.searchParams.set("siDoCd", "41");
         url.searchParams.set("siGunGuCd", siGunGuCd);
-        const response = await fetcher(url);
-        if (!response.ok) return "";
-        return response.text();
+        return fetchXml(url, fetcher);
       })
     );
     return responses.flatMap((xml) => parseNhisLtcXml(xml, patient.region)).slice(0, 20);
   } catch {
     return [];
   }
+}
+
+async function fetchXml(url: URL, fetcher?: FetchLike) {
+  if (fetcher) {
+    const response = await fetcher(url);
+    if (!response.ok) return "";
+    return response.text();
+  }
+
+  const cacheKey = `nhis-ltc:${url.toString()}`;
+  const cached = getCached<string>(cacheKey);
+  if (cached !== null) return cached;
+
+  const xml = await fetchTextWithTimeout(url, requestTimeoutMs);
+  if (xml) setCached(cacheKey, xml, cacheTtlMs);
+  return xml;
 }
 
 export function parseNhisLtcXml(xml: string, region: Patient["region"]): CareResource[] {

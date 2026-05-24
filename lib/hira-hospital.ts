@@ -1,7 +1,10 @@
 import { regionLabels } from "./labels";
+import { fetchTextWithTimeout, getCached, setCached } from "./server-cache";
 import type { Patient } from "./types";
 
 type FetchLike = typeof fetch;
+const cacheTtlMs = 30 * 60 * 1000;
+const requestTimeoutMs = 5000;
 
 export type HospitalReference = {
   id: string;
@@ -25,7 +28,7 @@ export async function fetchHiraHospitalReferences(
   if (!serviceKey) return [];
 
   const endpoint = env.HIRA_HOSP_API_URL || defaultEndpoint;
-  const fetcher = options.fetcher ?? fetch;
+  const fetcher = options.fetcher;
   const url = new URL(endpoint);
   url.searchParams.set("serviceKey", serviceKey);
   url.searchParams.set("pageNo", "1");
@@ -33,13 +36,27 @@ export async function fetchHiraHospitalReferences(
   url.searchParams.set("sidoCd", "310000");
 
   try {
-    const response = await fetcher(url);
-    if (!response.ok) return [];
-    const xml = await response.text();
+    const xml = await fetchXml(url, fetcher);
     return parseHiraHospitalXml(xml, patient.region);
   } catch {
     return [];
   }
+}
+
+async function fetchXml(url: URL, fetcher?: FetchLike) {
+  if (fetcher) {
+    const response = await fetcher(url);
+    if (!response.ok) return "";
+    return response.text();
+  }
+
+  const cacheKey = `hira-hospital:${url.toString()}`;
+  const cached = getCached<string>(cacheKey);
+  if (cached !== null) return cached;
+
+  const xml = await fetchTextWithTimeout(url, requestTimeoutMs);
+  if (xml) setCached(cacheKey, xml, cacheTtlMs);
+  return xml;
 }
 
 export function parseHiraHospitalXml(xml: string, region: Patient["region"]): HospitalReference[] {

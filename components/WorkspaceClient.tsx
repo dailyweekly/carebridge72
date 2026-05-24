@@ -6,13 +6,15 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Copy,
+  DatabaseZap,
   FileText,
   Languages,
   Loader2,
   LockKeyhole,
+  WifiOff,
   Wand2
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CareCandidateList } from "./CareCandidateList";
 import { PatientInputForm } from "./PatientInputForm";
 import { RiskResultCard } from "./RiskResultCard";
@@ -20,7 +22,7 @@ import { assessCaseReview } from "@/lib/case-review";
 import { calculateRisk } from "@/lib/risk";
 import { matchCareResources } from "@/lib/resources";
 import { generateFamilyGuide } from "@/lib/guide";
-import type { CareResource, Language, Patient } from "@/lib/types";
+import type { CareResource, Language, Patient, ResourceMatch } from "@/lib/types";
 import type { DraftKind, DraftResponse } from "@/lib/llm-draft";
 
 type WorkspaceClientProps = {
@@ -29,6 +31,7 @@ type WorkspaceClientProps = {
 };
 
 type DraftState = Record<DraftKind, DraftResponse | null>;
+type ResourceStatus = "loading" | "live" | "fallback";
 const workspaceAccessCode = "7272";
 
 export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientProps) {
@@ -41,16 +44,61 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
   const [memo, setMemo] = useState("72시간 내 전화 확인 후 식사·이동 공백과 가족 연락 가능 여부를 확인합니다.");
   const [pendingKind, setPendingKind] = useState<DraftKind | null>(null);
   const [drafts, setDrafts] = useState<DraftState>({ handoff: null, family: null });
+  const [liveResourceMatch, setLiveResourceMatch] = useState<(ResourceMatch & { patientId: string }) | null>(null);
+  const [resourceStatus, setResourceStatus] = useState<ResourceStatus>("loading");
   const [error, setError] = useState("");
 
   const risk = useMemo(() => calculateRisk(patient), [patient]);
-  const resourceMatch = useMemo(() => matchCareResources(patient, resources), [patient, resources]);
+  const fallbackResourceMatch = useMemo<ResourceMatch>(
+    () => ({ ...matchCareResources(patient, resources), source: "mock" }),
+    [patient, resources]
+  );
+  const resourceMatch =
+    liveResourceMatch?.patientId === patient.id ? liveResourceMatch : fallbackResourceMatch;
+  const resourceSourceLabel =
+    resourceStatus === "loading"
+      ? "공공데이터 조회 중"
+      : resourceMatch.source === "nhis-live-with-mock-fallback"
+        ? "NHIS 실시간 + mock 보강"
+        : "mock 후보";
   const guide = useMemo(
     () => generateFamilyGuide(patient, risk, resourceMatch.candidates, foreignLanguage),
     [foreignLanguage, patient, resourceMatch.candidates, risk]
   );
   const signal = useMemo(() => assessCaseReview(patient, risk), [patient, risk]);
   const activeDraftCount = Number(Boolean(drafts.handoff)) + Number(Boolean(drafts.family));
+
+  useEffect(() => {
+    if (!accessGranted) return;
+
+    let cancelled = false;
+    const patientSnapshot = patient;
+
+    async function loadLiveResources() {
+      try {
+        const response = await fetch("/api/resources", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ patient: patientSnapshot })
+        });
+        if (!response.ok) throw new Error(`resources request failed: ${response.status}`);
+        const result = (await response.json()) as ResourceMatch;
+        if (cancelled) return;
+        setLiveResourceMatch({ ...result, patientId: patientSnapshot.id });
+        setResourceStatus(result.source === "nhis-live-with-mock-fallback" ? "live" : "fallback");
+      } catch {
+        if (cancelled) return;
+        setLiveResourceMatch(null);
+        setResourceStatus("fallback");
+      }
+    }
+
+    void loadLiveResources();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessGranted, patient]);
 
   if (!accessGranted) {
     return (
@@ -143,7 +191,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           <SummaryTile label="선택 사례" value={`${patient.id} · ${risk.band} ${risk.score}점`} tone={risk.band === "HIGH" ? "risk" : "default"} />
           <SummaryTile label="검토 시간" value={`${signal.windowStatus} · ${signal.elapsedHours}h`} />
-          <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} />
+          <SummaryTile label="지역 후보" value={`${resourceMatch.candidates.length}건`} hint={resourceSourceLabel} />
           <SummaryTile label="초안 상태" value={`${activeDraftCount}/2 생성`} />
         </div>
       </section>
@@ -162,6 +210,8 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
               onChange={(nextPatient) => {
                 setPatient(nextPatient);
                 setDrafts({ handoff: null, family: null });
+                setLiveResourceMatch(null);
+                setResourceStatus("loading");
               }}
               onPrivacyBlocked={setError}
               foreignLanguage={foreignLanguage}
@@ -197,6 +247,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
             <RiskResultCard risk={risk} patient={patient} />
           </div>
           <div id="resource-review">
+            <ResourceSourceNotice status={resourceStatus} source={resourceMatch.source} />
             <CareCandidateList
               candidates={resourceMatch.candidates}
               regionLabel={resourceMatch.candidates[0]?.regionLabel ?? ""}
@@ -285,6 +336,34 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
   }
 }
 
+function ResourceSourceNotice({ status, source }: { status: ResourceStatus; source?: ResourceMatch["source"] }) {
+  const isLive = source === "nhis-live-with-mock-fallback" && status === "live";
+  return (
+    <div className="mb-3 rounded-md border border-line bg-white p-3 shadow-soft">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-2">
+          <span className="mt-0.5 text-teal">
+            {isLive ? <DatabaseZap size={18} /> : status === "loading" ? <Loader2 size={18} className="animate-spin" /> : <WifiOff size={18} />}
+          </span>
+          <div>
+            <p className="text-sm font-black text-ink">
+              {isLive ? "공공데이터 실시간 후보 반영" : status === "loading" ? "공공데이터 후보 조회 중" : "예비 후보 데이터로 표시"}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              {isLive
+                ? "국민건강보험공단 장기요양기관 검색 서비스 결과를 우선 반영하고, 부족한 카테고리는 mock 후보로 보강합니다."
+                : "외부 API 지연 또는 미응답 시 화면 흐름을 유지하기 위해 예비 후보를 표시합니다."}
+            </p>
+          </div>
+        </div>
+        <span className="rounded-md border border-line bg-panel px-2 py-1 text-xs font-bold text-slate-700">
+          {isLive ? "NHIS live" : status === "loading" ? "loading" : "mock fallback"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function ScopeCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <article className="rounded-md border border-line bg-panel p-3">
@@ -295,11 +374,22 @@ function ScopeCard({ icon, title, text }: { icon: React.ReactNode; title: string
   );
 }
 
-function SummaryTile({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "risk" }) {
+function SummaryTile({
+  label,
+  value,
+  hint,
+  tone = "default"
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "default" | "risk";
+}) {
   return (
     <div className={`rounded-md border px-3 py-3 ${tone === "risk" ? "border-cranberry bg-rose-50" : "border-line bg-panel"}`}>
       <p className="text-xs font-bold text-slate-500">{label}</p>
       <p className={`mt-1 text-lg font-black ${tone === "risk" ? "text-cranberry" : "text-ink"}`}>{value}</p>
+      {hint ? <p className="mt-1 text-xs font-semibold text-slate-500">{hint}</p> : null}
     </div>
   );
 }
