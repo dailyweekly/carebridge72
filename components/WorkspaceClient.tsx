@@ -105,7 +105,7 @@ export function WorkspaceClient({ initialPatients, resources }: WorkspaceClientP
                   <h2 className="text-lg font-bold text-ink">AI 초안 생성</h2>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  OpenAI API 키가 없으면 동일 입력 기반의 예비 초안이 생성됩니다. API 키가 있으면 서버 route에서 Responses API를 호출합니다.
+                  Claude API 키가 없으면 동일 입력 기반의 예비 초안이 생성됩니다. API 키가 있으면 서버 route에서 Anthropic Messages API를 호출합니다.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -212,7 +212,7 @@ function DraftCard({
         <h3 className="font-bold text-ink">{title}</h3>
         {draft ? (
           <span className="rounded bg-white px-2 py-1 text-xs font-bold text-slate-700">
-            {draft.source === "openai" ? "LLM 생성" : "예비 초안"} · {draft.safetyPass ? "통과" : "검토 필요"}
+            {draft.source === "claude" ? "Claude 생성" : "예비 초안"} · {draft.safetyPass ? "통과" : "검토 필요"}
           </span>
         ) : null}
       </div>

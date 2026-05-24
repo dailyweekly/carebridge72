@@ -38,7 +38,7 @@ npm run capture
 
 ## 2. 기술 스택
 
-Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다. `/workspace`는 OpenAI Responses API 연동 준비가 된 LLM 문서화 보조 화면이며, `OPENAI_API_KEY`가 없으면 동일 입력 기반 예비 초안을 생성합니다.
+Next.js 16 App Router, React 19, TypeScript, TailwindCSS, Vitest, Playwright, mock JSON only. Brief의 Next.js 14+ / React 18+ 조건을 상위 호환 버전으로 충족합니다. 모델 구조는 규칙 기반 surrogate를 사용하며, HIRA 정식 데이터 수령 후 ONNX 추론 모듈로 교체할 수 있도록 API와 순수 함수 경계를 분리했습니다. `/workspace`는 Claude Messages API 연동 준비가 된 LLM 문서화 보조 화면이며, `ANTHROPIC_API_KEY`가 없으면 동일 입력 기반 예비 초안을 생성합니다.
 
 ## 3. 데모 시나리오
 

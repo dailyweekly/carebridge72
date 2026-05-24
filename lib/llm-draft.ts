@@ -16,7 +16,7 @@ export type DraftRequest = {
 export type DraftResponse = {
   kind: DraftKind;
   text: string;
-  source: "openai" | "fallback";
+  source: "claude" | "fallback";
   model: string;
   safetyPass: boolean;
   blocked: boolean;
@@ -26,25 +26,31 @@ export type DraftResponse = {
 const fallbackModel = "deterministic-fallback";
 
 export async function createLlmDraft(input: DraftRequest): Promise<DraftResponse> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+  const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
 
   if (!apiKey) {
     return finalizeDraft(input, buildFallbackDraft(input), "fallback", fallbackModel);
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
         "content-type": "application/json"
       },
       body: JSON.stringify({
         model,
-        instructions: buildInstructions(input.kind),
-        input: buildPrompt(input),
-        max_output_tokens: 900
+        max_tokens: 900,
+        system: buildInstructions(input.kind),
+        messages: [
+          {
+            role: "user",
+            content: buildPrompt(input)
+          }
+        ]
       })
     });
 
@@ -54,7 +60,7 @@ export async function createLlmDraft(input: DraftRequest): Promise<DraftResponse
 
     const payload = await response.json();
     const text = extractOutputText(payload) || buildFallbackDraft(input);
-    return finalizeDraft(input, text, "openai", model);
+    return finalizeDraft(input, text, "claude", model);
   } catch {
     return finalizeDraft(input, buildFallbackDraft(input), "fallback", `${fallbackModel}:network`);
   }
@@ -158,22 +164,14 @@ function finalizeDraft(
 
 function extractOutputText(payload: unknown) {
   if (typeof payload !== "object" || payload === null) return "";
-  const maybeText = (payload as { output_text?: unknown }).output_text;
-  if (typeof maybeText === "string") return maybeText;
+  const content = (payload as { content?: unknown }).content;
+  if (!Array.isArray(content)) return "";
 
-  const output = (payload as { output?: unknown }).output;
-  if (!Array.isArray(output)) return "";
-
-  return output
-    .flatMap((item) => {
-      if (typeof item !== "object" || item === null) return [];
-      const content = (item as { content?: unknown }).content;
-      if (!Array.isArray(content)) return [];
-      return content.map((part) => {
-        if (typeof part !== "object" || part === null) return "";
-        const text = (part as { text?: unknown }).text;
-        return typeof text === "string" ? text : "";
-      });
+  return content
+    .map((part) => {
+      if (typeof part !== "object" || part === null) return "";
+      const text = (part as { text?: unknown }).text;
+      return typeof text === "string" ? text : "";
     })
     .filter(Boolean)
     .join("\n")
