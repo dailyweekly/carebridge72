@@ -36,6 +36,7 @@ try {
   await workspacePage.goto(`${baseUrl}/workspace`, { waitUntil: "networkidle" });
   await enterWorkspace(workspacePage, workspaceAccessCode);
   await hideDevChrome(workspacePage);
+  await waitForWorkspaceData(workspacePage);
   await workspacePage.screenshot({ path: path.join(captureDir, "06-workspace.png"), fullPage: false });
   await workspacePage.locator("text=병원 사회사업실 기준정보").scrollIntoViewIfNeeded();
   await workspacePage.screenshot({ path: path.join(captureDir, "07-hospital-reference.png"), fullPage: false });
@@ -161,4 +162,17 @@ async function enterWorkspace(page, accessCode) {
       await hideDevChrome(page);
     }
   }
+}
+
+async function waitForWorkspaceData(page) {
+  await Promise.allSettled([
+    page
+      .locator("text=/공공데이터 반영|예비 후보|기본 후보 정보로 표시/")
+      .first()
+      .waitFor({ state: "visible", timeout: 20000 }),
+    page
+      .locator("text=/공공데이터 반영|연결됨 · 지역 결과 없음|API 키 미설정|승인 또는 키 확인 필요|응답 지연/")
+      .first()
+      .waitFor({ state: "visible", timeout: 60000 })
+  ]);
 }
