@@ -48,7 +48,7 @@
 
 다음 캡처를 제출용으로 사용합니다.
 
-- `captures/01-input.png`: 가명 환자 입력 화면
+- `captures/01-input.png`: 시연용 사례 입력 화면
 - `captures/02-risk.png`: 위험 신호 확인 화면
 - `captures/03-candidates.png`: 지역 돌봄 자원 후보 화면
 - `captures/04-guide.png`: 가족 안내문 화면

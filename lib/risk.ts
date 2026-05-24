@@ -38,7 +38,7 @@ export function calculateRisk(patient?: Partial<Patient> | null): RiskResult {
       band: "LOW",
       reasons: [
         "입력 정보가 부족하여 보수적인 기본값으로 표시합니다.",
-        "가명 데이터만 사용되며 실제 의료 판단은 포함하지 않습니다.",
+        "시연용 입력만 사용되며 실제 의료 판단은 포함하지 않습니다.",
         "공공 담당자가 원자료를 확인해야 합니다."
       ],
       factors: [],

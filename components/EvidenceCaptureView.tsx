@@ -32,7 +32,7 @@ export function EvidenceCaptureView({
     >
       <CaptureCaption
         title="별첨5 캡처 화면"
-        description={`작성일: ${submissionEvidence.preparedAt} / 시연 기준: ${signal.referenceLabel} / 가명 데이터(P003) / 모델 버전: ${risk.modelVersion} / 운영 원칙 확인: 통과 / 본 화면은 ${submissionEvidence.purpose}용입니다.`}
+        description={`작성일: ${submissionEvidence.preparedAt} / 시연 기준: ${signal.referenceLabel} / 시연용 사례(P003) / 모델 버전: ${risk.modelVersion} / 운영 원칙 확인: 통과 / 본 화면은 ${submissionEvidence.purpose}용입니다.`}
       />
       <div className="mb-3 flex flex-col gap-2 border-b border-line pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -44,7 +44,7 @@ export function EvidenceCaptureView({
             <CalendarDays size={14} />
             {submissionEvidence.preparedAt}
           </span>
-          <span className="rounded-md border border-line bg-white px-2 py-1">가명 사례 {patient.id}</span>
+          <span className="rounded-md border border-line bg-white px-2 py-1">시연용 사례 {patient.id}</span>
           <span className="rounded-md border border-line bg-white px-2 py-1">
             운영 원칙 확인: {safetyPass ? "통과" : "검토 필요"}
           </span>
